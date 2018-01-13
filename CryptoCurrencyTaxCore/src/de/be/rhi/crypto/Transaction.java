@@ -1,94 +1,152 @@
-/**
- *
- */
 package de.be.rhi.crypto;
 
 import java.math.BigDecimal;
-import java.util.Comparator;
 import java.util.Date;
 
 import de.be.rhi.crypto.util.MathUtil;
 import de.be.rhi.crypto.util.ObjectUtil;
 
 /**
- * @author René
+ * TODO RHildebrand JavaDoc
+ *
+ * @author Renï¿½ Hildebrand
+ * @version 1.0
+ * @since 13.01.2018, 15:21:20
  *
  */
 public class Transaction implements Comparable<Transaction> {
 
+	/**
+	 * TODO RHildebrand JavaDoc
+	 */
 	private Date transactionDate;
+	/**
+	 * TODO RHildebrand JavaDoc
+	 */
 	private TransactionType transactionType;
+	/**
+	 * TODO RHildebrand JavaDoc
+	 */
 	private Currency basisWaehrung;
+	/**
+	 * TODO RHildebrand JavaDoc
+	 */
 	private Currency transaktionsWaehrung;
+	/**
+	 * TODO RHildebrand JavaDoc
+	 */
 	private Currency depotWaehrung;
+	/**
+	 * TODO RHildebrand JavaDoc
+	 */
 	private BigDecimal kursBasiswaehrung;
+	/**
+	 * TODO RHildebrand JavaDoc
+	 */
 	private BigDecimal kursTransaktionsWaehrung;
+	/**
+	 * TODO RHildebrand JavaDoc
+	 */
 	private BigDecimal betragTransaktionsWaehrung;
+	/**
+	 * TODO RHildebrand JavaDoc
+	 */
 	private BigDecimal prozentsatzTransactionsGebuehr;
+	/**
+	 * TODO RHildebrand JavaDoc
+	 */
 	private String referenz;
+	/**
+	 * TODO RHildebrand JavaDoc
+	 */
 	private String beschreibung;
 
+	/**
+	 * TODO RHildebrand JavaDoc
+	 *
+	 * @return
+	 */
 	public BigDecimal getBetragBasisWaehrungVorGebuehr() {
-		return MathUtil.calculateRuleOfThree(kursBasiswaehrung,
-				betragTransaktionsWaehrung, kursTransaktionsWaehrung);
+		return MathUtil.calculateRuleOfThree(kursBasiswaehrung, betragTransaktionsWaehrung, kursTransaktionsWaehrung);
 	}
 
+	/**
+	 * TODO RHildebrand JavaDoc
+	 *
+	 * @return
+	 */
 	public BigDecimal getBetragBasisWaehrungNachGebuehr() {
-		return getBetragBasisWaehrungVorGebuehr().subtract(
-				getBetragBasisWaehrungGebuehr());
+		return getBetragBasisWaehrungVorGebuehr().subtract(getBetragBasisWaehrungGebuehr());
 	}
 
+	/**
+	 * TODO RHildebrand JavaDoc
+	 *
+	 * @return
+	 */
 	public BigDecimal getBetragBasisWaehrungGebuehr() {
 		BigDecimal result = getBetragBasisWaehrungVorGebuehr();
 
-		if (ObjectUtil.isBigDecimalNotZero(result)
-				&& ObjectUtil
-				.isBigDecimalNotZero(prozentsatzTransactionsGebuehr)) {
-			result = MathUtil.calculateRuleOfThree(result,
-					prozentsatzTransactionsGebuehr, new BigDecimal("100"));
+		if (ObjectUtil.isBigDecimalNotZero(result) && ObjectUtil.isBigDecimalNotZero(prozentsatzTransactionsGebuehr)) {
+			result = MathUtil.calculateRuleOfThree(result, prozentsatzTransactionsGebuehr, new BigDecimal("100"));
 		}
 
 		return result;
 	}
 
+	/**
+	 * TODO RHildebrand JavaDoc
+	 *
+	 * @return
+	 */
 	public BigDecimal getBetragDepotWaehrungVorGebuehr() {
-		return MathUtil.calculateRuleOfThree(betragTransaktionsWaehrung,
-				new BigDecimal("1"), kursTransaktionsWaehrung);
+		return MathUtil.calculateRuleOfThree(betragTransaktionsWaehrung, new BigDecimal("1"), kursTransaktionsWaehrung);
 	}
 
+	/**
+	 * TODO RHildebrand JavaDoc
+	 *
+	 * @return
+	 */
 	public BigDecimal getBetragDepotWaehrungNachGebuehr() {
-		return getBetragDepotWaehrungVorGebuehr().subtract(
-				getBetragDepotWaehrungGebuehr());
+		return getBetragDepotWaehrungVorGebuehr().subtract(getBetragDepotWaehrungGebuehr());
 	}
 
+	/**
+	 * TODO RHildebrand JavaDoc
+	 *
+	 * @return
+	 */
 	public BigDecimal getBetragDepotWaehrungGebuehr() {
 		BigDecimal result = getBetragDepotWaehrungVorGebuehr();
 
-		if (ObjectUtil.isBigDecimalNotZero(result)
-				&& ObjectUtil
-				.isBigDecimalNotZero(prozentsatzTransactionsGebuehr)) {
-			result = MathUtil.calculateRuleOfThree(result,
-					prozentsatzTransactionsGebuehr, new BigDecimal("100"));
+		if (ObjectUtil.isBigDecimalNotZero(result) && ObjectUtil.isBigDecimalNotZero(prozentsatzTransactionsGebuehr)) {
+			result = MathUtil.calculateRuleOfThree(result, prozentsatzTransactionsGebuehr, new BigDecimal("100"));
 		}
 
 		return result;
 	}
 
+	/**
+	 * TODO RHildebrand JavaDoc
+	 *
+	 * @return
+	 */
 	public BigDecimal getBetragTransaktionsWaehrungNachGebuehr() {
-		BigDecimal result = betragTransaktionsWaehrung != null ? betragTransaktionsWaehrung
-				: BigDecimal.ZERO;
+		BigDecimal result = betragTransaktionsWaehrung != null ? betragTransaktionsWaehrung : BigDecimal.ZERO;
 		return result.subtract(getBetragTransaktionsWaehrungGebuehr());
 	}
 
+	/**
+	 * TODO RHildebrand JavaDoc
+	 *
+	 * @return
+	 */
 	public BigDecimal getBetragTransaktionsWaehrungGebuehr() {
-		BigDecimal result = betragTransaktionsWaehrung != null ? betragTransaktionsWaehrung
-				: BigDecimal.ZERO;
+		BigDecimal result = betragTransaktionsWaehrung != null ? betragTransaktionsWaehrung : BigDecimal.ZERO;
 
-		if (ObjectUtil.isBigDecimalNotZero(result)
-				&& ObjectUtil
-				.isBigDecimalNotZero(prozentsatzTransactionsGebuehr)) {
-			result = MathUtil.calculateRuleOfThree(result,
-					prozentsatzTransactionsGebuehr, new BigDecimal("100"));
+		if (ObjectUtil.isBigDecimalNotZero(result) && ObjectUtil.isBigDecimalNotZero(prozentsatzTransactionsGebuehr)) {
+			result = MathUtil.calculateRuleOfThree(result, prozentsatzTransactionsGebuehr, new BigDecimal("100"));
 		}
 		return result;
 	}
@@ -102,7 +160,7 @@ public class Transaction implements Comparable<Transaction> {
 
 	/**
 	 * @param transactionDate
-	 *            the transactionDate to set
+	 *           the transactionDate to set
 	 */
 	public void setTransactionDate(final Date transactionDate) {
 		this.transactionDate = transactionDate;
@@ -117,7 +175,7 @@ public class Transaction implements Comparable<Transaction> {
 
 	/**
 	 * @param transactionType
-	 *            the transactionType to set
+	 *           the transactionType to set
 	 */
 	public void setTransactionType(final TransactionType transactionType) {
 		this.transactionType = transactionType;
@@ -132,7 +190,7 @@ public class Transaction implements Comparable<Transaction> {
 
 	/**
 	 * @param basisWaehrung
-	 *            the basisWaehrung to set
+	 *           the basisWaehrung to set
 	 */
 	public void setBasisWaehrung(final Currency basisWaehrung) {
 		this.basisWaehrung = basisWaehrung;
@@ -151,7 +209,7 @@ public class Transaction implements Comparable<Transaction> {
 
 	/**
 	 * @param transaktionsWaehrung
-	 *            the transaktionsWaehrung to set
+	 *           the transaktionsWaehrung to set
 	 */
 	public void setTransaktionsWaehrung(final Currency transaktionsWaehrung) {
 		this.transaktionsWaehrung = transaktionsWaehrung;
@@ -170,7 +228,7 @@ public class Transaction implements Comparable<Transaction> {
 
 	/**
 	 * @param depotWaehrung
-	 *            the depotWaehrung to set
+	 *           the depotWaehrung to set
 	 */
 	public void setDepotWaehrung(final Currency depotWaehrung) {
 		this.depotWaehrung = depotWaehrung;
@@ -185,7 +243,7 @@ public class Transaction implements Comparable<Transaction> {
 
 	/**
 	 * @param kursBasiswaehrung
-	 *            the kursBasiswaehrung to set
+	 *           the kursBasiswaehrung to set
 	 */
 	public void setKursBasiswaehrung(final BigDecimal kursBasiswaehrung) {
 		this.kursBasiswaehrung = kursBasiswaehrung;
@@ -204,7 +262,7 @@ public class Transaction implements Comparable<Transaction> {
 
 	/**
 	 * @param kursTransaktionsWaehrung
-	 *            the kursTransaktionsWaehrung to set
+	 *           the kursTransaktionsWaehrung to set
 	 */
 	public void setKursTransaktionsWaehrung(final BigDecimal kursTransaktionsWaehrung) {
 		this.kursTransaktionsWaehrung = kursTransaktionsWaehrung;
@@ -223,10 +281,9 @@ public class Transaction implements Comparable<Transaction> {
 
 	/**
 	 * @param betragTransaktionsWaehrung
-	 *            the betragTransaktionsWaehrung to set
+	 *           the betragTransaktionsWaehrung to set
 	 */
-	public void setBetragTransaktionsWaehrung(
-			final BigDecimal betragTransaktionsWaehrung) {
+	public void setBetragTransaktionsWaehrung(final BigDecimal betragTransaktionsWaehrung) {
 		this.betragTransaktionsWaehrung = betragTransaktionsWaehrung;
 	}
 
@@ -239,10 +296,9 @@ public class Transaction implements Comparable<Transaction> {
 
 	/**
 	 * @param prozentsatzTransactionsGebuehr
-	 *            the prozentsatzTransactionsGebuehr to set
+	 *           the prozentsatzTransactionsGebuehr to set
 	 */
-	public void setProzentsatzTransactionsGebuehr(
-			final BigDecimal prozentsatzTransactionsGebuehr) {
+	public void setProzentsatzTransactionsGebuehr(final BigDecimal prozentsatzTransactionsGebuehr) {
 		this.prozentsatzTransactionsGebuehr = prozentsatzTransactionsGebuehr;
 	}
 
@@ -255,7 +311,7 @@ public class Transaction implements Comparable<Transaction> {
 
 	/**
 	 * @param referenz
-	 *            the referenz to set
+	 *           the referenz to set
 	 */
 	public void setReferenz(final String referenz) {
 		this.referenz = referenz;
@@ -270,7 +326,7 @@ public class Transaction implements Comparable<Transaction> {
 
 	/**
 	 * @param beschreibung
-	 *            the beschreibung to set
+	 *           the beschreibung to set
 	 */
 	public void setBeschreibung(final String beschreibung) {
 		this.beschreibung = beschreibung;
@@ -278,58 +334,45 @@ public class Transaction implements Comparable<Transaction> {
 
 	@Override
 	public String toString() {
-		return "Transaction [" + "\ngetBetragBasisWaehrungVorGebuehr()="
-				+ getBetragBasisWaehrungVorGebuehr() + " " + getBasisWaehrung()
-				+ ", \ngetBetragBasisWaehrungNachGebuehr()="
-				+ getBetragBasisWaehrungNachGebuehr() + " "
-				+ getBasisWaehrung() + ", \ngetBetragBasisWaehrungGebuehr()="
-				+ getBetragBasisWaehrungGebuehr() + " " + getBasisWaehrung()
-				+ ", \ngetBetragDepotWaehrungVorGebuehr()="
-				+ getBetragDepotWaehrungVorGebuehr() + " " + getDepotWaehrung()
-				+ ", \ngetBetragDepotWaehrungNachGebuehr()="
-				+ getBetragDepotWaehrungNachGebuehr() + " "
-				+ getDepotWaehrung() + ", \ngetBetragDepotWaehrungGebuehr()="
-				+ getBetragDepotWaehrungGebuehr() + " " + getDepotWaehrung()
-				+ ", \ngetBetragTransaktionsWaehrung()="
-				+ getBetragTransaktionsWaehrung() + " "
-				+ getTransaktionsWaehrung()
-				+ ", \ngetBetragTransaktionsWaehrungNachGebuehr()="
-				+ getBetragTransaktionsWaehrungNachGebuehr() + " "
-				+ getTransaktionsWaehrung()
-				+ ", \ngetBetragTransaktionsWaehrungGebuehr()="
-				+ getBetragTransaktionsWaehrungGebuehr() + " "
-				+ getTransaktionsWaehrung() + ", \ngetTransactionDate()="
-				+ getTransactionDate() + ", \ngetTransactionType()="
-				+ getTransactionType() + ", \ngetBasisWaehrung()="
-				+ getBasisWaehrung() + ", \ngetTransaktionsWaehrung()="
-				+ getTransaktionsWaehrung() + ", \ngetDepotWaehrung()="
-				+ getDepotWaehrung() + ", \ngetKursBasiswaehrung()="
-				+ getKursBasiswaehrung() + " " + getBasisWaehrung()
-				+ ", \ngetKursTransaktionsWaehrung()="
-				+ getKursTransaktionsWaehrung() + " "
-				+ getTransaktionsWaehrung()
-				+ ", \ngetProzentsatzTransactionsGebuehr()="
-				+ getProzentsatzTransactionsGebuehr() + "%"
-				+ ", \ngetReferenz()=" + getReferenz()
-				+ ", \ngetBeschreibung()=" + getBeschreibung() + "]";
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("Transaction\n");
+
+		sb.append("Referenz: " + getReferenz() + "\n");
+		sb.append("Beschreibung: " + getBeschreibung() + "\n");
+		sb.append("Transactionsdatum: " + getTransactionDate() + "\n");
+		sb.append("Transaktionstype: " + getTransactionType().getLabel() + " ("+ getTransactionType().getDescription() + ")\n");
+
+		sb.append("Prozentsatz Transaktionsgebuehr: " + getProzentsatzTransactionsGebuehr() + " %\n");
+
+		sb.append("Basiswaehrung: " + getBasisWaehrung().getLabel() + "\n");
+		sb.append("Transaktionswaehrung: " + getTransaktionsWaehrung().getLabel() + "\n");
+		sb.append("Depotwaehrung: " + getDepotWaehrung().getLabel() + "\n");
+
+		sb.append("Werte Basiswaehrung:\n");
+		sb.append("Betrag vor Gebuehr: " + getBetragBasisWaehrungVorGebuehr() + " " + getBasisWaehrung() + "\n");
+		sb.append("Betrag Gebuehr: " + getBetragBasisWaehrungGebuehr() + " "	+ getBasisWaehrung() + "\n");
+		sb.append("Betrag nach Gebuehr: " + getBetragBasisWaehrungNachGebuehr() + " " + getBasisWaehrung() + "\n");
+
+		sb.append("Werte Transaktionswaehrung:\n");
+		sb.append("Betrag vor Gebuehr: " + getBetragTransaktionsWaehrung() + " " + getTransaktionsWaehrung() + "\n");
+		sb.append("Betrag Gebuehr: " + getBetragTransaktionsWaehrungGebuehr() + " " + getTransaktionsWaehrung() + "\n");
+		sb.append("Betrag nach Gebuehr: " + getBetragTransaktionsWaehrungNachGebuehr() + " " + getTransaktionsWaehrung() + "\n");
+
+		sb.append("Werte Depotwaehrung:\n");
+		sb.append("Betrag vor Gebuehr: " + getBetragDepotWaehrungVorGebuehr() + " " + getDepotWaehrung() + "\n");
+		sb.append("Betrag Gebuehr: " + getBetragDepotWaehrungGebuehr() + " " + getDepotWaehrung() + "\n");
+		sb.append("Betrag nach Gebuehr: " + getBetragDepotWaehrungNachGebuehr() + " " + getDepotWaehrung() + "\n");
+
+		return sb.toString();
 	}
 
 	@Override
 	public int compareTo(final Transaction transaction) {
 
-		if (getTransactionDate() == null
-				|| transaction.getTransactionDate() == null) {
+		if (getTransactionDate() == null || transaction.getTransactionDate() == null) {
 			return 0;
 		}
-		return getTransactionDate().compareTo(
-				transaction.getTransactionDate());
+		return getTransactionDate().compareTo(transaction.getTransactionDate());
 	}
-
-	public static final Comparator<Transaction> transactionComparator = new Comparator<>() {
-
-		@Override
-		public int compare(final Transaction transaction1, final Transaction transaction2) {
-			return transaction1.compareTo(transaction2);
-		}
-	};
 }

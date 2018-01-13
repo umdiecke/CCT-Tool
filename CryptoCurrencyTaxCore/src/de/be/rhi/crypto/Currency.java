@@ -1,11 +1,11 @@
-/**
- * 
- */
 package de.be.rhi.crypto;
 
 /**
- * @author René
- * FIXME RHI ENUM ersetzen durch eine Property-Datei o.ä.
+ * TODO RHildebrand JavaDoc
+ *
+ * @author René Hildebrand
+ * @version 1.0
+ * @since 13.01.2018, 15:20:15
  *
  */
 public enum Currency {
@@ -37,6 +37,8 @@ public enum Currency {
 	private final String description;
 
 	/**
+	 * TODO RHildebrand JavaDoc
+	 *
 	 * @param label
 	 * @param description
 	 */
@@ -45,10 +47,16 @@ public enum Currency {
 		this.description = description;
 	}
 
+	/**
+	 * @return the label
+	 */
 	public String getLabel() {
 		return label;
 	}
 
+	/**
+	 * @return the description
+	 */
 	public String getDescription() {
 		return description;
 	}

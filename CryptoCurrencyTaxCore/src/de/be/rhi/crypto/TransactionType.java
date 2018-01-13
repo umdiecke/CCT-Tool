@@ -1,10 +1,11 @@
-/**
- * 
- */
 package de.be.rhi.crypto;
 
 /**
- * @author René
+ * TODO RHildebrand JavaDoc
+ *
+ * @author René Hildebrand
+ * @version 1.0
+ * @since 13.01.2018, 15:23:39
  *
  */
 public enum TransactionType {
@@ -19,11 +20,11 @@ public enum TransactionType {
 	/**
 	 * Kauf - Kauf von Coins
 	 */
-	KAUF("Kauf", "Kauf von Coins"),
+	KAUF("Kauf", "Kauf von Depot-Waehrung"),
 	/**
 	 * Verkauf - Verkauf von Coins
 	 */
-	VERKAUF("Verkauf", "Verkauf von Coins");
+	VERKAUF("Verkauf", "Verkauf von Depot-Waehrung");
 
 	/**
 	 * Label
@@ -35,6 +36,8 @@ public enum TransactionType {
 	private final String description;
 
 	/**
+	 * TODO RHildebrand JavaDoc
+	 *
 	 * @param label
 	 * @param description
 	 */
@@ -43,10 +46,16 @@ public enum TransactionType {
 		this.description = description;
 	}
 
+	/**
+	 * @return the label
+	 */
 	public String getLabel() {
 		return label;
 	}
 
+	/**
+	 * @return the description
+	 */
 	public String getDescription() {
 		return description;
 	}
