@@ -246,10 +246,10 @@ public class Transaction implements Comparable<Transaction> {
 	 *           the kursBasiswaehrung to set
 	 */
 	public void setKursBasiswaehrung(final BigDecimal kursBasiswaehrung) {
-		this.kursBasiswaehrung = kursBasiswaehrung;
+		this.kursBasiswaehrung = ObjectUtil.cutZeroFractionDigits(kursBasiswaehrung);
 
 		if (kursTransaktionsWaehrung == null) {
-			kursTransaktionsWaehrung = kursBasiswaehrung;
+			kursTransaktionsWaehrung = this.kursBasiswaehrung;
 		}
 	}
 
@@ -265,10 +265,10 @@ public class Transaction implements Comparable<Transaction> {
 	 *           the kursTransaktionsWaehrung to set
 	 */
 	public void setKursTransaktionsWaehrung(final BigDecimal kursTransaktionsWaehrung) {
-		this.kursTransaktionsWaehrung = kursTransaktionsWaehrung;
+		this.kursTransaktionsWaehrung = ObjectUtil.cutZeroFractionDigits(kursTransaktionsWaehrung);
 
 		if (kursBasiswaehrung == null) {
-			kursBasiswaehrung = kursTransaktionsWaehrung;
+			kursBasiswaehrung = this.kursTransaktionsWaehrung;
 		}
 	}
 
@@ -284,7 +284,7 @@ public class Transaction implements Comparable<Transaction> {
 	 *           the betragTransaktionsWaehrung to set
 	 */
 	public void setBetragTransaktionsWaehrung(final BigDecimal betragTransaktionsWaehrung) {
-		this.betragTransaktionsWaehrung = betragTransaktionsWaehrung;
+		this.betragTransaktionsWaehrung = ObjectUtil.cutZeroFractionDigits(betragTransaktionsWaehrung);
 	}
 
 	/**
@@ -299,7 +299,7 @@ public class Transaction implements Comparable<Transaction> {
 	 *           the prozentsatzTransactionsGebuehr to set
 	 */
 	public void setProzentsatzTransactionsGebuehr(final BigDecimal prozentsatzTransactionsGebuehr) {
-		this.prozentsatzTransactionsGebuehr = prozentsatzTransactionsGebuehr;
+		this.prozentsatzTransactionsGebuehr = ObjectUtil.cutZeroFractionDigits(prozentsatzTransactionsGebuehr, 0);
 	}
 
 	/**

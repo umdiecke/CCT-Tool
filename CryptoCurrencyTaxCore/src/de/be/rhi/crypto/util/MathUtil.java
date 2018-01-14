@@ -46,7 +46,7 @@ public class MathUtil {
 		BigDecimal result = BigDecimal.ZERO;
 
 		if(ObjectUtil.isBigDecimalNotZero(a) && ObjectUtil.isBigDecimalNotZero(b) && ObjectUtil.isBigDecimalNotZero(c)) {
-			result = a.multiply(b).divide(c, MathUtil.DEFAULT_CALCULATION_SCALE, MathUtil.DEFAULT_ROUNDING_MODE);
+			result = ObjectUtil.cutZeroFractionDigits(a.multiply(b).divide(c, MathUtil.DEFAULT_CALCULATION_SCALE, MathUtil.DEFAULT_ROUNDING_MODE));
 		}
 
 		return result;
