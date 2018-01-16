@@ -5,6 +5,9 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import de.be.rhi.crypto.io.TransactionInputReader;
 
 /**
  * TODO RHildebrand JavaDoc
@@ -32,6 +35,17 @@ public class TransactionHandler {
 	public TransactionHandler() {
 		transactionList = new ArrayList<>();
 		depotTransactionMap = new EnumMap<>(Currency.class);
+	}
+
+	/**
+	 * TODO RHildebrand JavaDoc
+	 *
+	 * @param inputReader
+	 */
+	public void loadNewTransactions(final Set<TransactionInputReader> inputReader) {
+		for (TransactionInputReader transactionInputReader : inputReader) {
+			addTransactionList(transactionInputReader.readTransactionList());
+		}
 	}
 
 	/**

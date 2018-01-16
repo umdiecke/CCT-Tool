@@ -61,13 +61,22 @@ public class Transaction implements Comparable<Transaction> {
 	 */
 	private String beschreibung;
 
+	// FIXME RHildebrand Neben den berechneten Werten, muss auch eine Möglichkeit geschaffen werden, um die vom Protal genannten Beträge aufzunehmen.
+	// Zu beachtende Felder:
+	// BTC vor Gebühr
+	// EUR vor Gebühr
+	// BTC nach Gebühr
+	// EUR nach Gebühr
+	// Zu- / Abgang
+	// Kontostand
+
 	/**
 	 * TODO RHildebrand JavaDoc
 	 *
 	 * @return
 	 */
 	public BigDecimal getBetragBasisWaehrungVorGebuehr() {
-		return MathUtil.calculateRuleOfThree(kursBasiswaehrung, betragTransaktionsWaehrung, kursTransaktionsWaehrung);
+		return MathUtil.calculateRuleOfThree(this.kursBasiswaehrung, this.betragTransaktionsWaehrung, this.kursTransaktionsWaehrung);
 	}
 
 	/**
@@ -87,8 +96,8 @@ public class Transaction implements Comparable<Transaction> {
 	public BigDecimal getBetragBasisWaehrungGebuehr() {
 		BigDecimal result = getBetragBasisWaehrungVorGebuehr();
 
-		if (ObjectUtil.isBigDecimalNotZero(result) && ObjectUtil.isBigDecimalNotZero(prozentsatzTransactionsGebuehr)) {
-			result = MathUtil.calculateRuleOfThree(result, prozentsatzTransactionsGebuehr, new BigDecimal("100"));
+		if (ObjectUtil.isBigDecimalNotZero(result) && ObjectUtil.isBigDecimalNotZero(this.prozentsatzTransactionsGebuehr)) {
+			result = MathUtil.calculateRuleOfThree(result, this.prozentsatzTransactionsGebuehr, new BigDecimal("100"));
 		}
 
 		return result;
@@ -100,7 +109,7 @@ public class Transaction implements Comparable<Transaction> {
 	 * @return
 	 */
 	public BigDecimal getBetragDepotWaehrungVorGebuehr() {
-		return MathUtil.calculateRuleOfThree(betragTransaktionsWaehrung, new BigDecimal("1"), kursTransaktionsWaehrung);
+		return MathUtil.calculateRuleOfThree(this.betragTransaktionsWaehrung, new BigDecimal("1"), this.kursTransaktionsWaehrung);
 	}
 
 	/**
@@ -120,8 +129,8 @@ public class Transaction implements Comparable<Transaction> {
 	public BigDecimal getBetragDepotWaehrungGebuehr() {
 		BigDecimal result = getBetragDepotWaehrungVorGebuehr();
 
-		if (ObjectUtil.isBigDecimalNotZero(result) && ObjectUtil.isBigDecimalNotZero(prozentsatzTransactionsGebuehr)) {
-			result = MathUtil.calculateRuleOfThree(result, prozentsatzTransactionsGebuehr, new BigDecimal("100"));
+		if (ObjectUtil.isBigDecimalNotZero(result) && ObjectUtil.isBigDecimalNotZero(this.prozentsatzTransactionsGebuehr)) {
+			result = MathUtil.calculateRuleOfThree(result, this.prozentsatzTransactionsGebuehr, new BigDecimal("100"));
 		}
 
 		return result;
@@ -133,7 +142,7 @@ public class Transaction implements Comparable<Transaction> {
 	 * @return
 	 */
 	public BigDecimal getBetragTransaktionsWaehrungNachGebuehr() {
-		BigDecimal result = betragTransaktionsWaehrung != null ? betragTransaktionsWaehrung : BigDecimal.ZERO;
+		BigDecimal result = this.betragTransaktionsWaehrung != null ? this.betragTransaktionsWaehrung : BigDecimal.ZERO;
 		return result.subtract(getBetragTransaktionsWaehrungGebuehr());
 	}
 
@@ -143,10 +152,10 @@ public class Transaction implements Comparable<Transaction> {
 	 * @return
 	 */
 	public BigDecimal getBetragTransaktionsWaehrungGebuehr() {
-		BigDecimal result = betragTransaktionsWaehrung != null ? betragTransaktionsWaehrung : BigDecimal.ZERO;
+		BigDecimal result = this.betragTransaktionsWaehrung != null ? this.betragTransaktionsWaehrung : BigDecimal.ZERO;
 
-		if (ObjectUtil.isBigDecimalNotZero(result) && ObjectUtil.isBigDecimalNotZero(prozentsatzTransactionsGebuehr)) {
-			result = MathUtil.calculateRuleOfThree(result, prozentsatzTransactionsGebuehr, new BigDecimal("100"));
+		if (ObjectUtil.isBigDecimalNotZero(result) && ObjectUtil.isBigDecimalNotZero(this.prozentsatzTransactionsGebuehr)) {
+			result = MathUtil.calculateRuleOfThree(result, this.prozentsatzTransactionsGebuehr, new BigDecimal("100"));
 		}
 		return result;
 	}
@@ -155,7 +164,7 @@ public class Transaction implements Comparable<Transaction> {
 	 * @return the transactionDate
 	 */
 	public Date getTransactionDate() {
-		return transactionDate;
+		return this.transactionDate;
 	}
 
 	/**
@@ -170,7 +179,7 @@ public class Transaction implements Comparable<Transaction> {
 	 * @return the transactionType
 	 */
 	public TransactionType getTransactionType() {
-		return transactionType;
+		return this.transactionType;
 	}
 
 	/**
@@ -185,7 +194,7 @@ public class Transaction implements Comparable<Transaction> {
 	 * @return the basisWaehrung
 	 */
 	public Currency getBasisWaehrung() {
-		return basisWaehrung;
+		return this.basisWaehrung;
 	}
 
 	/**
@@ -195,8 +204,8 @@ public class Transaction implements Comparable<Transaction> {
 	public void setBasisWaehrung(final Currency basisWaehrung) {
 		this.basisWaehrung = basisWaehrung;
 
-		if (transaktionsWaehrung == null) {
-			transaktionsWaehrung = basisWaehrung;
+		if (this.transaktionsWaehrung == null) {
+			this.transaktionsWaehrung = basisWaehrung;
 		}
 	}
 
@@ -204,7 +213,7 @@ public class Transaction implements Comparable<Transaction> {
 	 * @return the transaktionsWaehrung
 	 */
 	public Currency getTransaktionsWaehrung() {
-		return transaktionsWaehrung;
+		return this.transaktionsWaehrung;
 	}
 
 	/**
@@ -214,8 +223,8 @@ public class Transaction implements Comparable<Transaction> {
 	public void setTransaktionsWaehrung(final Currency transaktionsWaehrung) {
 		this.transaktionsWaehrung = transaktionsWaehrung;
 
-		if (basisWaehrung == null) {
-			basisWaehrung = transaktionsWaehrung;
+		if (this.basisWaehrung == null) {
+			this.basisWaehrung = transaktionsWaehrung;
 		}
 	}
 
@@ -223,7 +232,7 @@ public class Transaction implements Comparable<Transaction> {
 	 * @return the depotWaehrung
 	 */
 	public Currency getDepotWaehrung() {
-		return depotWaehrung;
+		return this.depotWaehrung;
 	}
 
 	/**
@@ -238,7 +247,7 @@ public class Transaction implements Comparable<Transaction> {
 	 * @return the kursBasiswaehrung
 	 */
 	public BigDecimal getKursBasiswaehrung() {
-		return kursBasiswaehrung;
+		return this.kursBasiswaehrung;
 	}
 
 	/**
@@ -248,8 +257,8 @@ public class Transaction implements Comparable<Transaction> {
 	public void setKursBasiswaehrung(final BigDecimal kursBasiswaehrung) {
 		this.kursBasiswaehrung = ObjectUtil.cutZeroFractionDigits(kursBasiswaehrung);
 
-		if (kursTransaktionsWaehrung == null) {
-			kursTransaktionsWaehrung = this.kursBasiswaehrung;
+		if (this.kursTransaktionsWaehrung == null) {
+			this.kursTransaktionsWaehrung = this.kursBasiswaehrung;
 		}
 	}
 
@@ -257,7 +266,7 @@ public class Transaction implements Comparable<Transaction> {
 	 * @return the kursTransaktionsWaehrung
 	 */
 	public BigDecimal getKursTransaktionsWaehrung() {
-		return kursTransaktionsWaehrung;
+		return this.kursTransaktionsWaehrung;
 	}
 
 	/**
@@ -267,8 +276,8 @@ public class Transaction implements Comparable<Transaction> {
 	public void setKursTransaktionsWaehrung(final BigDecimal kursTransaktionsWaehrung) {
 		this.kursTransaktionsWaehrung = ObjectUtil.cutZeroFractionDigits(kursTransaktionsWaehrung);
 
-		if (kursBasiswaehrung == null) {
-			kursBasiswaehrung = this.kursTransaktionsWaehrung;
+		if (this.kursBasiswaehrung == null) {
+			this.kursBasiswaehrung = this.kursTransaktionsWaehrung;
 		}
 	}
 
@@ -276,7 +285,7 @@ public class Transaction implements Comparable<Transaction> {
 	 * @return the betragTransaktionsWaehrung
 	 */
 	public BigDecimal getBetragTransaktionsWaehrung() {
-		return betragTransaktionsWaehrung;
+		return this.betragTransaktionsWaehrung;
 	}
 
 	/**
@@ -291,7 +300,7 @@ public class Transaction implements Comparable<Transaction> {
 	 * @return the prozentsatzTransactionsGebuehr
 	 */
 	public BigDecimal getProzentsatzTransactionsGebuehr() {
-		return prozentsatzTransactionsGebuehr;
+		return this.prozentsatzTransactionsGebuehr;
 	}
 
 	/**
@@ -306,7 +315,7 @@ public class Transaction implements Comparable<Transaction> {
 	 * @return the referenz
 	 */
 	public String getReferenz() {
-		return referenz;
+		return this.referenz;
 	}
 
 	/**
@@ -321,7 +330,7 @@ public class Transaction implements Comparable<Transaction> {
 	 * @return the beschreibung
 	 */
 	public String getBeschreibung() {
-		return beschreibung;
+		return this.beschreibung;
 	}
 
 	/**
@@ -343,11 +352,13 @@ public class Transaction implements Comparable<Transaction> {
 		sb.append("Transactionsdatum: " + getTransactionDate() + "\n");
 		sb.append("Transaktionstype: " + getTransactionType().getLabel() + " ("+ getTransactionType().getDescription() + ")\n");
 
-		sb.append("Prozentsatz Transaktionsgebuehr: " + getProzentsatzTransactionsGebuehr() + " %\n");
-
 		sb.append("Basiswaehrung: " + getBasisWaehrung().getLabel() + "\n");
 		sb.append("Transaktionswaehrung: " + getTransaktionsWaehrung().getLabel() + "\n");
 		sb.append("Depotwaehrung: " + getDepotWaehrung().getLabel() + "\n");
+
+		sb.append("Kurs Basiswaehrung: " + getKursBasiswaehrung() + " " + getBasisWaehrung() + "\n");
+		sb.append("Kurs Transaktionswaehrung: " + getKursTransaktionsWaehrung() + " " + getTransaktionsWaehrung() + "\n");
+		sb.append("Prozentsatz Transaktionsgebuehr: " + getProzentsatzTransactionsGebuehr() + " %\n");
 
 		sb.append("Werte Basiswaehrung:\n");
 		sb.append("Betrag vor Gebuehr: " + getBetragBasisWaehrungVorGebuehr() + " " + getBasisWaehrung() + "\n");

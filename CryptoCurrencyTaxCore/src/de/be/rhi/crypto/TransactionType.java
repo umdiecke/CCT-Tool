@@ -3,7 +3,7 @@ package de.be.rhi.crypto;
 /**
  * TODO RHildebrand JavaDoc
  *
- * @author René Hildebrand
+ * @author Renï¿½ Hildebrand
  * @version 1.0
  * @since 13.01.2018, 15:23:39
  *
@@ -44,19 +44,21 @@ public enum TransactionType {
 	private TransactionType(final String label, final String description) {
 		this.label = label;
 		this.description = description;
+
 	}
+
 
 	/**
 	 * @return the label
 	 */
 	public String getLabel() {
-		return label;
+		return this.label;
 	}
 
 	/**
 	 * @return the description
 	 */
 	public String getDescription() {
-		return description;
+		return this.description;
 	}
 }

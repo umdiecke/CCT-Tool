@@ -1,9 +1,15 @@
 package de.be.rhi.crypto;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.util.Calendar;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.Test;
+
+import de.be.rhi.crypto.io.CsvTransactionInputReader;
+import de.be.rhi.crypto.io.TransactionInputReader;
 
 public class TransactionHandlerTest {
 
@@ -14,6 +20,31 @@ public class TransactionHandlerTest {
 		transactionHandler.addTransaction(createTransaction2());
 		transactionHandler.addTransaction(createTransaction3());
 		transactionHandler.addTransaction(createTransaction4());
+
+		for (Transaction transaction : transactionHandler.getTransactionList()) {
+			System.out.println(transaction + "\n");
+		}
+	}
+
+	@Test
+	public void testTransactionHandlerTransactionListWithCsvImport() {
+
+		File csvFileBtc = new File("U:\\git\\CCT-Tool\\CryptoCurrencyTaxCore\\ressources\\account_statement20110101-20180116.csv");
+		File csvFileEth = new File("U:\\git\\CCT-Tool\\CryptoCurrencyTaxCore\\ressources\\account_statement20170601-20180116.csv");
+		File csvFileBch = new File("U:\\git\\CCT-Tool\\CryptoCurrencyTaxCore\\ressources\\account_statement20170701-20180116.csv");
+
+		Set<File> files = new HashSet<>();
+		files.add(csvFileBtc);
+		files.add(csvFileEth);
+		files.add(csvFileBch);
+
+		CsvTransactionInputReader csvTransactionInputReader = new CsvTransactionInputReader(files);
+
+		Set<TransactionInputReader> inputReader = new HashSet<>();
+		inputReader.add(csvTransactionInputReader);
+
+		TransactionHandler transactionHandler = new TransactionHandler();
+		transactionHandler.loadNewTransactions(inputReader);
 
 		for (Transaction transaction : transactionHandler.getTransactionList()) {
 			System.out.println(transaction + "\n");
