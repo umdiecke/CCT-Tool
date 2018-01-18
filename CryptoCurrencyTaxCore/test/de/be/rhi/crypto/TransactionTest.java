@@ -28,10 +28,9 @@ public class TransactionTest {
 
 		transaction.setBetragTransaktionsWaehrung(new BigDecimal("100"));
 
-		transaction.setProzentsatzTransactionsGebuehr(new BigDecimal("0.05"));
 
 		transaction.setReferenz("rhi12356");
-		transaction.setBeschreibung("Transaktion 1");
+		transaction.setMarktplatz("bitcoin.de");
 		return transaction;
 	}
 

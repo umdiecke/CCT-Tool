@@ -1,3 +1,8 @@
+/**
+ * CCT-Tool (Crypto Currency Tax Tool)
+ *
+ * Erstellt 2018 von <a href="mailto:umdiecke@gmx.de">René Hildebrand</a>
+ */
 package de.be.rhi.crypto;
 
 import java.math.BigDecimal;
@@ -9,7 +14,7 @@ import de.be.rhi.crypto.util.ObjectUtil;
 /**
  * TODO RHildebrand JavaDoc
  *
- * @author Ren� Hildebrand
+ * @author <a href="mailto:umdiecke@gmx.de">René Hildebrand</a>
  * @version 1.0
  * @since 13.01.2018, 15:21:20
  *
@@ -51,31 +56,84 @@ public class Transaction implements Comparable<Transaction> {
 	/**
 	 * TODO RHildebrand JavaDoc
 	 */
-	private BigDecimal prozentsatzTransactionsGebuehr;
-	/**
-	 * TODO RHildebrand JavaDoc
-	 */
 	private String referenz;
 	/**
 	 * TODO RHildebrand JavaDoc
 	 */
-	private String beschreibung;
-
-	// FIXME RHildebrand Neben den berechneten Werten, muss auch eine Möglichkeit geschaffen werden, um die vom Protal genannten Beträge aufzunehmen.
-	// Zu beachtende Felder:
-	// BTC vor Gebühr
-	// EUR vor Gebühr
-	// BTC nach Gebühr
-	// EUR nach Gebühr
-	// Zu- / Abgang
-	// Kontostand
+	private String marktplatz;
+	/**
+	 * TODO RHildebrand JavaDoc
+	 */
+	private BigDecimal betragBasisWaehrungVorGebuehrMarktplatz;
+	/**
+	 * TODO RHildebrand JavaDoc
+	 */
+	private BigDecimal betragBasisWaehrungNachGebuehrMarktplatz;
+	/**
+	 * TODO RHildebrand JavaDoc
+	 */
+	private BigDecimal betragBasisWaehrungGebuehrMarktplatz;
+	/**
+	 * TODO RHildebrand JavaDoc
+	 */
+	private BigDecimal betragTransaktionsWaehrungNachGebuehrMarktplatz;
+	/**
+	 * TODO RHildebrand JavaDoc
+	 */
+	private BigDecimal betragTransaktionsWaehrungGebuehrMarktplatz;
+	/**
+	 * TODO RHildebrand JavaDoc
+	 */
+	private BigDecimal betragDepotWaehrungVorGebuehrMarktplatz;
+	/**
+	 * TODO RHildebrand JavaDoc
+	 */
+	private BigDecimal betragDepotWaehrungNachGebuehrMarktplatz;
+	/**
+	 * TODO RHildebrand JavaDoc
+	 */
+	private BigDecimal betragDepotWaehrungGebuehrMarktplatz;
+	/**
+	 * TODO RHildebrand JavaDoc
+	 */
+	private BigDecimal kontostandDepotWaehrungMarktplatz;
+	/**
+	 * TODO RHildebrand JavaDoc
+	 */
+	private BigDecimal eigenanteilTransaktionsgebuehr;
 
 	/**
 	 * TODO RHildebrand JavaDoc
 	 *
 	 * @return
 	 */
-	public BigDecimal getBetragBasisWaehrungVorGebuehr() {
+	public BigDecimal getKontostandBasisWaehrungCalc() {
+		BigDecimal result = BigDecimal.ZERO;
+		if (this.kursBasiswaehrung != null && this.kontostandDepotWaehrungMarktplatz != null) {
+			result = ObjectUtil.cutZeroFractionDigits(this.kontostandDepotWaehrungMarktplatz.multiply(this.kursBasiswaehrung));
+		}
+		return result;
+	}
+
+	/**
+	 * TODO RHildebrand JavaDoc
+	 *
+	 * @return
+	 */
+	public BigDecimal getKontostandTransaktionsWaehrungCalc() {
+		BigDecimal result = BigDecimal.ZERO;
+		if (this.kursTransaktionsWaehrung != null && this.kontostandDepotWaehrungMarktplatz != null) {
+			result = ObjectUtil.cutZeroFractionDigits(this.kontostandDepotWaehrungMarktplatz.multiply(this.kursTransaktionsWaehrung));
+		}
+		return result;
+	}
+
+	/**
+	 * TODO RHildebrand JavaDoc
+	 *
+	 * @return
+	 */
+	public BigDecimal getBetragBasisWaehrungVorGebuehrCalc() {
 		return MathUtil.calculateRuleOfThree(this.kursBasiswaehrung, this.betragTransaktionsWaehrung, this.kursTransaktionsWaehrung);
 	}
 
@@ -84,8 +142,8 @@ public class Transaction implements Comparable<Transaction> {
 	 *
 	 * @return
 	 */
-	public BigDecimal getBetragBasisWaehrungNachGebuehr() {
-		return getBetragBasisWaehrungVorGebuehr().subtract(getBetragBasisWaehrungGebuehr());
+	public BigDecimal getBetragBasisWaehrungNachGebuehrCalc() {
+		return ObjectUtil.cutZeroFractionDigits(getBetragBasisWaehrungVorGebuehrCalc().subtract(getBetragBasisWaehrungGebuehrCalc()));
 	}
 
 	/**
@@ -93,13 +151,28 @@ public class Transaction implements Comparable<Transaction> {
 	 *
 	 * @return
 	 */
-	public BigDecimal getBetragBasisWaehrungGebuehr() {
-		BigDecimal result = getBetragBasisWaehrungVorGebuehr();
+	public BigDecimal getBetragBasisWaehrungGebuehrCalc() {
+		BigDecimal result = getBetragBasisWaehrungVorGebuehrCalc();
 
-		if (ObjectUtil.isBigDecimalNotZero(result) && ObjectUtil.isBigDecimalNotZero(this.prozentsatzTransactionsGebuehr)) {
-			result = MathUtil.calculateRuleOfThree(result, this.prozentsatzTransactionsGebuehr, new BigDecimal("100"));
+		if (ObjectUtil.isBigDecimalNotZero(result) && ObjectUtil.isBigDecimalNotZero(getProzentsatzTransactionsGebuehr())) {
+			result = MathUtil.calculateRuleOfThree(result, getProzentsatzTransactionsGebuehr(), new BigDecimal("100"));
+			result = calcEigenanteilGebuehr(result);
 		}
 
+		return ObjectUtil.cutZeroFractionDigits(result);
+	}
+
+	/**
+	 * TODO RHildebrand JavaDoc
+	 *
+	 * @param result
+	 * @return
+	 */
+	protected BigDecimal calcEigenanteilGebuehr(BigDecimal result) {
+		BigDecimal eigenanteil = getEigenanteilTransaktionsgebuehr() != null ? getEigenanteilTransaktionsgebuehr().multiply(new BigDecimal("0.01")) : new BigDecimal("1");
+		if (ObjectUtil.isBigDecimalNotZero(result) && eigenanteil != null) {
+			result = result.multiply(eigenanteil);
+		}
 		return result;
 	}
 
@@ -108,7 +181,7 @@ public class Transaction implements Comparable<Transaction> {
 	 *
 	 * @return
 	 */
-	public BigDecimal getBetragDepotWaehrungVorGebuehr() {
+	public BigDecimal getBetragDepotWaehrungVorGebuehrCalc() {
 		return MathUtil.calculateRuleOfThree(this.betragTransaktionsWaehrung, new BigDecimal("1"), this.kursTransaktionsWaehrung);
 	}
 
@@ -117,8 +190,8 @@ public class Transaction implements Comparable<Transaction> {
 	 *
 	 * @return
 	 */
-	public BigDecimal getBetragDepotWaehrungNachGebuehr() {
-		return getBetragDepotWaehrungVorGebuehr().subtract(getBetragDepotWaehrungGebuehr());
+	public BigDecimal getBetragDepotWaehrungNachGebuehrCalc() {
+		return getBetragDepotWaehrungVorGebuehrCalc().subtract(getBetragDepotWaehrungGebuehrCalc());
 	}
 
 	/**
@@ -126,11 +199,11 @@ public class Transaction implements Comparable<Transaction> {
 	 *
 	 * @return
 	 */
-	public BigDecimal getBetragDepotWaehrungGebuehr() {
-		BigDecimal result = getBetragDepotWaehrungVorGebuehr();
+	public BigDecimal getBetragDepotWaehrungGebuehrCalc() {
+		BigDecimal result = getBetragDepotWaehrungVorGebuehrCalc();
 
-		if (ObjectUtil.isBigDecimalNotZero(result) && ObjectUtil.isBigDecimalNotZero(this.prozentsatzTransactionsGebuehr)) {
-			result = MathUtil.calculateRuleOfThree(result, this.prozentsatzTransactionsGebuehr, new BigDecimal("100"));
+		if (ObjectUtil.isBigDecimalNotZero(result) && ObjectUtil.isBigDecimalNotZero(getProzentsatzTransactionsGebuehr())) {
+			result = MathUtil.calculateRuleOfThree(result, getProzentsatzTransactionsGebuehr(), new BigDecimal("100"));
 		}
 
 		return result;
@@ -141,9 +214,9 @@ public class Transaction implements Comparable<Transaction> {
 	 *
 	 * @return
 	 */
-	public BigDecimal getBetragTransaktionsWaehrungNachGebuehr() {
+	public BigDecimal getBetragTransaktionsWaehrungNachGebuehrCalc() {
 		BigDecimal result = this.betragTransaktionsWaehrung != null ? this.betragTransaktionsWaehrung : BigDecimal.ZERO;
-		return result.subtract(getBetragTransaktionsWaehrungGebuehr());
+		return ObjectUtil.cutZeroFractionDigits(result.subtract(getBetragTransaktionsWaehrungGebuehrCalc()));
 	}
 
 	/**
@@ -151,13 +224,23 @@ public class Transaction implements Comparable<Transaction> {
 	 *
 	 * @return
 	 */
-	public BigDecimal getBetragTransaktionsWaehrungGebuehr() {
+	public BigDecimal getBetragTransaktionsWaehrungGebuehrCalc() {
 		BigDecimal result = this.betragTransaktionsWaehrung != null ? this.betragTransaktionsWaehrung : BigDecimal.ZERO;
 
-		if (ObjectUtil.isBigDecimalNotZero(result) && ObjectUtil.isBigDecimalNotZero(this.prozentsatzTransactionsGebuehr)) {
-			result = MathUtil.calculateRuleOfThree(result, this.prozentsatzTransactionsGebuehr, new BigDecimal("100"));
+		if (ObjectUtil.isBigDecimalNotZero(result) && ObjectUtil.isBigDecimalNotZero(getProzentsatzTransactionsGebuehr())) {
+			result = MathUtil.calculateRuleOfThree(result, getProzentsatzTransactionsGebuehr(), new BigDecimal("100"));
+			result = calcEigenanteilGebuehr(result);
 		}
-		return result;
+		return ObjectUtil.cutZeroFractionDigits(result);
+	}
+
+	/**
+	 * @return the prozentsatzTransactionsGebuehr
+	 */
+	public BigDecimal getProzentsatzTransactionsGebuehr() {
+		BigDecimal base100 = new BigDecimal("100");
+		return base100.subtract(MathUtil.calculateRuleOfThree(getBetragDepotWaehrungNachGebuehrMarktplatz(), base100, getBetragDepotWaehrungVorGebuehrMarktplatz()))
+				.setScale(MathUtil.DEFAULT_ACCOUNTING_SCALE, MathUtil.DEFAULT_ROUNDING_MODE);
 	}
 
 	/**
@@ -297,18 +380,79 @@ public class Transaction implements Comparable<Transaction> {
 	}
 
 	/**
-	 * @return the prozentsatzTransactionsGebuehr
+	 * TODO RHildebrand JavaDoc
+	 *
 	 */
-	public BigDecimal getProzentsatzTransactionsGebuehr() {
-		return this.prozentsatzTransactionsGebuehr;
+	public void calcMissingValues() {
+		if (baseValuesFound()) {
+			if (this.betragDepotWaehrungVorGebuehrMarktplatz == null) {
+				this.betragDepotWaehrungVorGebuehrMarktplatz = getBetragDepotWaehrungVorGebuehrCalc();
+			}
+			if (this.betragDepotWaehrungGebuehrMarktplatz == null) {
+				this.betragDepotWaehrungGebuehrMarktplatz = getBetragDepotWaehrungGebuehrCalc();
+			}
+
+			if (this.betragTransaktionsWaehrungNachGebuehrMarktplatz == null) {
+				this.betragTransaktionsWaehrungNachGebuehrMarktplatz = getBetragTransaktionsWaehrungNachGebuehrCalc();
+			}
+			if (this.betragTransaktionsWaehrungGebuehrMarktplatz == null) {
+				this.betragTransaktionsWaehrungGebuehrMarktplatz = getBetragTransaktionsWaehrungGebuehrCalc();
+			}
+
+			if (this.betragBasisWaehrungVorGebuehrMarktplatz == null) {
+				this.betragBasisWaehrungVorGebuehrMarktplatz = getBetragBasisWaehrungVorGebuehrCalc();
+			}
+			if (this.betragBasisWaehrungNachGebuehrMarktplatz == null) {
+				this.betragBasisWaehrungNachGebuehrMarktplatz = getBetragBasisWaehrungNachGebuehrCalc();
+			}
+			if (this.betragBasisWaehrungGebuehrMarktplatz == null) {
+				this.betragBasisWaehrungGebuehrMarktplatz = getBetragBasisWaehrungGebuehrCalc();
+			}
+		}
 	}
 
 	/**
-	 * @param prozentsatzTransactionsGebuehr
-	 *           the prozentsatzTransactionsGebuehr to set
+	 * TODO RHildebrand JavaDoc
+	 *
+	 * @return
 	 */
-	public void setProzentsatzTransactionsGebuehr(final BigDecimal prozentsatzTransactionsGebuehr) {
-		this.prozentsatzTransactionsGebuehr = ObjectUtil.cutZeroFractionDigits(prozentsatzTransactionsGebuehr, 0);
+	private boolean baseValuesFound() {
+		return this.kursBasiswaehrung != null && this.betragTransaktionsWaehrung != null && this.kursTransaktionsWaehrung != null && this.betragDepotWaehrungNachGebuehrMarktplatz != null;
+	}
+
+	/**
+	 * TODO RHildebrand JavaDoc
+	 *
+	 * @return
+	 */
+	public boolean valide() {
+		boolean valide = true;
+		if (this.transactionType != TransactionType.INITIALISIERUNG) {
+			valide = valuesEqual(getBetragBasisWaehrungVorGebuehrMarktplatz(), getBetragBasisWaehrungVorGebuehrCalc());
+			valide = valide && valuesEqual(getBetragBasisWaehrungGebuehrMarktplatz(), getBetragBasisWaehrungGebuehrCalc());
+			valide = valide && valuesEqual(getBetragBasisWaehrungNachGebuehrMarktplatz(), getBetragBasisWaehrungNachGebuehrCalc());
+			valide = valide && valuesEqual(getBetragTransaktionsWaehrungGebuehrMarktplatz(), getBetragTransaktionsWaehrungGebuehrCalc());
+			valide = valide && valuesEqual(getBetragTransaktionsWaehrungNachGebuehrMarktplatz(), getBetragTransaktionsWaehrungNachGebuehrCalc());
+			valide = valide && valuesEqual(getBetragDepotWaehrungVorGebuehrMarktplatz(), getBetragDepotWaehrungVorGebuehrCalc());
+			valide = valide && valuesEqual(getBetragDepotWaehrungGebuehrMarktplatz(), getBetragDepotWaehrungGebuehrCalc());
+			valide = valide && valuesEqual(getBetragDepotWaehrungNachGebuehrMarktplatz(), getBetragDepotWaehrungNachGebuehrCalc());
+		}
+		return valide;
+	}
+
+	/**
+	 * TODO RHildebrand JavaDoc
+	 *
+	 * @param v1
+	 * @param v2
+	 * @return
+	 */
+	private boolean valuesEqual(final BigDecimal v1, final BigDecimal v2) {
+		boolean result = false;
+		if (v1 != null && v2 != null && v1.compareTo(v2) == 0) {
+			result = true;
+		}
+		return result;
 	}
 
 	/**
@@ -327,18 +471,168 @@ public class Transaction implements Comparable<Transaction> {
 	}
 
 	/**
-	 * @return the beschreibung
+	 * @return the marktplatz
 	 */
-	public String getBeschreibung() {
-		return this.beschreibung;
+	public String getMarktplatz() {
+		return this.marktplatz;
 	}
 
 	/**
-	 * @param beschreibung
-	 *           the beschreibung to set
+	 * @param marktplatz
+	 *           the marktplatz to set
 	 */
-	public void setBeschreibung(final String beschreibung) {
-		this.beschreibung = beschreibung;
+	public void setMarktplatz(final String marktplatz) {
+		this.marktplatz = marktplatz;
+	}
+
+	/**
+	 * @return the betragBasisWaehrungVorGebuehrMarktplatz
+	 */
+	public BigDecimal getBetragBasisWaehrungVorGebuehrMarktplatz() {
+		return ObjectUtil.cutZeroFractionDigits(this.betragBasisWaehrungVorGebuehrMarktplatz);
+	}
+
+	/**
+	 * @param betragBasisWaehrungVorGebuehrMarktplatz
+	 *           the betragBasisWaehrungVorGebuehrMarktplatz to set
+	 */
+	public void setBetragBasisWaehrungVorGebuehrMarktplatz(final BigDecimal betragBasisWaehrungVorGebuehrMarktplatz) {
+		this.betragBasisWaehrungVorGebuehrMarktplatz = betragBasisWaehrungVorGebuehrMarktplatz;
+	}
+
+	/**
+	 * @return the betragBasisWaehrungNachGebuehrMarktplatz
+	 */
+	public BigDecimal getBetragBasisWaehrungNachGebuehrMarktplatz() {
+		return ObjectUtil.cutZeroFractionDigits(this.betragBasisWaehrungNachGebuehrMarktplatz);
+	}
+
+	/**
+	 * @param betragBasisWaehrungNachGebuehrMarktplatz
+	 *           the betragBasisWaehrungNachGebuehrMarktplatz to set
+	 */
+	public void setBetragBasisWaehrungNachGebuehrMarktplatz(final BigDecimal betragBasisWaehrungNachGebuehrMarktplatz) {
+		this.betragBasisWaehrungNachGebuehrMarktplatz = betragBasisWaehrungNachGebuehrMarktplatz;
+	}
+
+	/**
+	 * @return the betragBasisWaehrungGebuehrMarktplatz
+	 */
+	public BigDecimal getBetragBasisWaehrungGebuehrMarktplatz() {
+		return ObjectUtil.cutZeroFractionDigits(this.betragBasisWaehrungGebuehrMarktplatz);
+	}
+
+	/**
+	 * @param betragBasisWaehrungGebuehrMarktplatz
+	 *           the betragBasisWaehrungGebuehrMarktplatz to set
+	 */
+	public void setBetragBasisWaehrungGebuehrMarktplatz(final BigDecimal betragBasisWaehrungGebuehrMarktplatz) {
+		this.betragBasisWaehrungGebuehrMarktplatz = betragBasisWaehrungGebuehrMarktplatz;
+	}
+
+	/**
+	 * @return the betragTransaktionsWaehrungNachGebuehrMarktplatz
+	 */
+	public BigDecimal getBetragTransaktionsWaehrungNachGebuehrMarktplatz() {
+		return ObjectUtil.cutZeroFractionDigits(this.betragTransaktionsWaehrungNachGebuehrMarktplatz);
+	}
+
+	/**
+	 * @param betragTransaktionsWaehrungNachGebuehrMarktplatz
+	 *           the betragTransaktionsWaehrungNachGebuehrMarktplatz to set
+	 */
+	public void setBetragTransaktionsWaehrungNachGebuehrMarktplatz(final BigDecimal betragTransaktionsWaehrungNachGebuehrMarktplatz) {
+		this.betragTransaktionsWaehrungNachGebuehrMarktplatz = betragTransaktionsWaehrungNachGebuehrMarktplatz;
+	}
+
+	/**
+	 * @return the betragTransaktionsWaehrungGebuehrMarktplatz
+	 */
+	public BigDecimal getBetragTransaktionsWaehrungGebuehrMarktplatz() {
+		return ObjectUtil.cutZeroFractionDigits(this.betragTransaktionsWaehrungGebuehrMarktplatz);
+	}
+
+	/**
+	 * @param betragTransaktionsWaehrungGebuehrMarktplatz
+	 *           the betragTransaktionsWaehrungGebuehrMarktplatz to set
+	 */
+	public void setBetragTransaktionsWaehrungGebuehrMarktplatz(final BigDecimal betragTransaktionsWaehrungGebuehrMarktplatz) {
+		this.betragTransaktionsWaehrungGebuehrMarktplatz = betragTransaktionsWaehrungGebuehrMarktplatz;
+	}
+
+	/**
+	 * @return the betragDepotWaehrungVorGebuehrMarktplatz
+	 */
+	public BigDecimal getBetragDepotWaehrungVorGebuehrMarktplatz() {
+		return ObjectUtil.cutZeroFractionDigits(this.betragDepotWaehrungVorGebuehrMarktplatz);
+	}
+
+	/**
+	 * @param betragDepotWaehrungVorGebuehrMarktplatz
+	 *           the betragDepotWaehrungVorGebuehrMarktplatz to set
+	 */
+	public void setBetragDepotWaehrungVorGebuehrMarktplatz(final BigDecimal betragDepotWaehrungVorGebuehrMarktplatz) {
+		this.betragDepotWaehrungVorGebuehrMarktplatz = betragDepotWaehrungVorGebuehrMarktplatz;
+	}
+
+	/**
+	 * @return the betragDepotWaehrungNachGebuehrMarktplatz
+	 */
+	public BigDecimal getBetragDepotWaehrungNachGebuehrMarktplatz() {
+		return ObjectUtil.cutZeroFractionDigits(this.betragDepotWaehrungNachGebuehrMarktplatz);
+	}
+
+	/**
+	 * @param betragDepotWaehrungNachGebuehrMarktplatz
+	 *           the betragDepotWaehrungNachGebuehrMarktplatz to set
+	 */
+	public void setBetragDepotWaehrungNachGebuehrMarktplatz(final BigDecimal betragDepotWaehrungNachGebuehrMarktplatz) {
+		this.betragDepotWaehrungNachGebuehrMarktplatz = betragDepotWaehrungNachGebuehrMarktplatz;
+	}
+
+	/**
+	 * @return the betragDepotWaehrungGebuehrMarktplatz
+	 */
+	public BigDecimal getBetragDepotWaehrungGebuehrMarktplatz() {
+		return ObjectUtil.cutZeroFractionDigits(this.betragDepotWaehrungGebuehrMarktplatz);
+	}
+
+	/**
+	 * @param betragDepotWaehrungGebuehrMarktplatz
+	 *           the betragDepotWaehrungGebuehrMarktplatz to set
+	 */
+	public void setBetragDepotWaehrungGebuehrMarktplatz(final BigDecimal betragDepotWaehrungGebuehrMarktplatz) {
+		this.betragDepotWaehrungGebuehrMarktplatz = betragDepotWaehrungGebuehrMarktplatz;
+	}
+
+	/**
+	 * @return the kontostandDepotWaehrungMarktplatz
+	 */
+	public BigDecimal getKontostandDepotWaehrungMarktplatz() {
+		return ObjectUtil.cutZeroFractionDigits(this.kontostandDepotWaehrungMarktplatz);
+	}
+
+	/**
+	 * @param kontostandDepotWaehrungMarktplatz
+	 *           the kontostandDepotWaehrungMarktplatz to set
+	 */
+	public void setKontostandDepotWaehrungMarktplatz(final BigDecimal kontostandDepotWaehrungMarktplatz) {
+		this.kontostandDepotWaehrungMarktplatz = ObjectUtil.cutZeroFractionDigits(kontostandDepotWaehrungMarktplatz);
+	}
+
+	/**
+	 * @return the eigenanteilTransaktionsgebuehr
+	 */
+	public BigDecimal getEigenanteilTransaktionsgebuehr() {
+		return this.eigenanteilTransaktionsgebuehr;
+	}
+
+	/**
+	 * @param eigenanteilTransaktionsgebuehr
+	 *           the eigenanteilTransaktionsgebuehr to set
+	 */
+	public void setEigenanteilTransaktionsgebuehr(final BigDecimal eigenanteilTransaktionsgebuehr) {
+		this.eigenanteilTransaktionsgebuehr = eigenanteilTransaktionsgebuehr;
 	}
 
 	@Override
@@ -348,7 +642,7 @@ public class Transaction implements Comparable<Transaction> {
 		sb.append("Transaction\n");
 
 		sb.append("Referenz: " + getReferenz() + "\n");
-		sb.append("Beschreibung: " + getBeschreibung() + "\n");
+		sb.append("Marktplatz: " + getMarktplatz() + "\n");
 		sb.append("Transactionsdatum: " + getTransactionDate() + "\n");
 		sb.append("Transaktionstype: " + getTransactionType().getLabel() + " ("+ getTransactionType().getDescription() + ")\n");
 
@@ -359,21 +653,43 @@ public class Transaction implements Comparable<Transaction> {
 		sb.append("Kurs Basiswaehrung: " + getKursBasiswaehrung() + " " + getBasisWaehrung() + "\n");
 		sb.append("Kurs Transaktionswaehrung: " + getKursTransaktionsWaehrung() + " " + getTransaktionsWaehrung() + "\n");
 		sb.append("Prozentsatz Transaktionsgebuehr: " + getProzentsatzTransactionsGebuehr() + " %\n");
+		sb.append("Eigenanteil Transaktionsgebuehr: " + getEigenanteilTransaktionsgebuehr() + " %\n");
 
-		sb.append("Werte Basiswaehrung:\n");
-		sb.append("Betrag vor Gebuehr: " + getBetragBasisWaehrungVorGebuehr() + " " + getBasisWaehrung() + "\n");
-		sb.append("Betrag Gebuehr: " + getBetragBasisWaehrungGebuehr() + " "	+ getBasisWaehrung() + "\n");
-		sb.append("Betrag nach Gebuehr: " + getBetragBasisWaehrungNachGebuehr() + " " + getBasisWaehrung() + "\n");
+		sb.append("Kontostand Basiswaehrung: " + getKontostandBasisWaehrungCalc() + " " + getBasisWaehrung() + "\n");
+		sb.append("Kontostand Transaktionswaehrung: " + getKontostandTransaktionsWaehrungCalc() + " " + getTransaktionsWaehrung() + "\n");
+		sb.append("Kontostand Depotwaehrung: " + getKontostandDepotWaehrungMarktplatz() + " " + getDepotWaehrung() + "\n");
 
-		sb.append("Werte Transaktionswaehrung:\n");
+		sb.append("Werte Basiswaehrung (Marktplatz):\n");
+		sb.append("Betrag vor Gebuehr: " + getBetragBasisWaehrungVorGebuehrMarktplatz() + " " + getBasisWaehrung() + "\n");
+		sb.append("Betrag Gebuehr: " + getBetragBasisWaehrungGebuehrMarktplatz() + " " + getBasisWaehrung() + "\n");
+		sb.append("Betrag nach Gebuehr: " + getBetragBasisWaehrungNachGebuehrMarktplatz() + " " + getBasisWaehrung() + "\n");
+
+		sb.append("Werte Basiswaehrung (berechnet):\n");
+		sb.append("Betrag vor Gebuehr: " + getBetragBasisWaehrungVorGebuehrCalc() + " " + getBasisWaehrung() + "\n");
+		sb.append("Betrag Gebuehr: " + getBetragBasisWaehrungGebuehrCalc() + " "	+ getBasisWaehrung() + "\n");
+		sb.append("Betrag nach Gebuehr: " + getBetragBasisWaehrungNachGebuehrCalc() + " " + getBasisWaehrung() + "\n");
+
+		sb.append("Werte Transaktionswaehrung (Marktplatz):\n");
 		sb.append("Betrag vor Gebuehr: " + getBetragTransaktionsWaehrung() + " " + getTransaktionsWaehrung() + "\n");
-		sb.append("Betrag Gebuehr: " + getBetragTransaktionsWaehrungGebuehr() + " " + getTransaktionsWaehrung() + "\n");
-		sb.append("Betrag nach Gebuehr: " + getBetragTransaktionsWaehrungNachGebuehr() + " " + getTransaktionsWaehrung() + "\n");
+		sb.append("Betrag Gebuehr: " + getBetragTransaktionsWaehrungGebuehrMarktplatz() + " " + getTransaktionsWaehrung() + "\n");
+		sb.append("Betrag nach Gebuehr: " + getBetragTransaktionsWaehrungNachGebuehrMarktplatz() + " " + getTransaktionsWaehrung() + "\n");
 
-		sb.append("Werte Depotwaehrung:\n");
-		sb.append("Betrag vor Gebuehr: " + getBetragDepotWaehrungVorGebuehr() + " " + getDepotWaehrung() + "\n");
-		sb.append("Betrag Gebuehr: " + getBetragDepotWaehrungGebuehr() + " " + getDepotWaehrung() + "\n");
-		sb.append("Betrag nach Gebuehr: " + getBetragDepotWaehrungNachGebuehr() + " " + getDepotWaehrung() + "\n");
+		sb.append("Werte Transaktionswaehrung (berechnet):\n");
+		sb.append("Betrag vor Gebuehr: " + getBetragTransaktionsWaehrung() + " " + getTransaktionsWaehrung() + "\n");
+		sb.append("Betrag Gebuehr: " + getBetragTransaktionsWaehrungGebuehrCalc() + " " + getTransaktionsWaehrung() + "\n");
+		sb.append("Betrag nach Gebuehr: " + getBetragTransaktionsWaehrungNachGebuehrCalc() + " " + getTransaktionsWaehrung() + "\n");
+
+		sb.append("Werte Depotwaehrung (Marktplatz):\n");
+		sb.append("Betrag vor Gebuehr: " + getBetragDepotWaehrungVorGebuehrMarktplatz() + " " + getDepotWaehrung() + "\n");
+		sb.append("Betrag Gebuehr: " + getBetragDepotWaehrungGebuehrMarktplatz() + " " + getDepotWaehrung() + "\n");
+		sb.append("Betrag nach Gebuehr: " + getBetragDepotWaehrungNachGebuehrMarktplatz() + " " + getDepotWaehrung() + "\n");
+
+		sb.append("Werte Depotwaehrung (berechnet):\n");
+		sb.append("Betrag vor Gebuehr: " + getBetragDepotWaehrungVorGebuehrCalc() + " " + getDepotWaehrung() + "\n");
+		sb.append("Betrag Gebuehr: " + getBetragDepotWaehrungGebuehrCalc() + " " + getDepotWaehrung() + "\n");
+		sb.append("Betrag nach Gebuehr: " + getBetragDepotWaehrungNachGebuehrCalc() + " " + getDepotWaehrung() + "\n");
+
+		sb.append("Valide: " + valide() + "\n");
 
 		return sb.toString();
 	}
