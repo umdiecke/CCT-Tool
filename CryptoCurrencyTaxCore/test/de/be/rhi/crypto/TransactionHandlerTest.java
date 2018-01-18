@@ -8,8 +8,8 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import de.be.rhi.crypto.io.CsvTransactionInputReader;
 import de.be.rhi.crypto.io.TransactionInputReader;
+import de.be.rhi.crypto.io.csv.BitcoinDeCsvTransactionInputReader;
 
 public class TransactionHandlerTest {
 
@@ -38,7 +38,7 @@ public class TransactionHandlerTest {
 		files.add(csvFileEth);
 		files.add(csvFileBch);
 
-		CsvTransactionInputReader csvTransactionInputReader = new CsvTransactionInputReader(files);
+		BitcoinDeCsvTransactionInputReader csvTransactionInputReader = new BitcoinDeCsvTransactionInputReader(files);
 
 		Set<TransactionInputReader> inputReader = new HashSet<>();
 		inputReader.add(csvTransactionInputReader);
@@ -65,10 +65,9 @@ public class TransactionHandlerTest {
 
 		transaction.setBetragTransaktionsWaehrung(new BigDecimal("100"));
 
-		transaction.setProzentsatzTransactionsGebuehr(new BigDecimal("0.05"));
 
 		transaction.setReferenz("rhi12356");
-		transaction.setBeschreibung("Transaktion 1");
+		transaction.setMarktplatz("bitcoin.de");
 		return transaction;
 	}
 
@@ -84,10 +83,8 @@ public class TransactionHandlerTest {
 
 		transaction.setBetragTransaktionsWaehrung(new BigDecimal("540"));
 
-		transaction.setProzentsatzTransactionsGebuehr(new BigDecimal("0.2"));
-
 		transaction.setReferenz("rhi12356");
-		transaction.setBeschreibung("Transaktion 2");
+		transaction.setMarktplatz("bitcoin.de");
 		return transaction;
 	}
 
@@ -105,10 +102,9 @@ public class TransactionHandlerTest {
 
 		transaction.setBetragTransaktionsWaehrung(new BigDecimal("1500"));
 
-		transaction.setProzentsatzTransactionsGebuehr(new BigDecimal("0.05"));
 
 		transaction.setReferenz("rhi12356");
-		transaction.setBeschreibung("Transaktion 3");
+		transaction.setMarktplatz("bitcoin.de");
 		return transaction;
 	}
 
@@ -130,10 +126,9 @@ public class TransactionHandlerTest {
 
 		transaction.setBetragTransaktionsWaehrung(new BigDecimal("30.25"));
 
-		transaction.setProzentsatzTransactionsGebuehr(new BigDecimal("2.0"));
 
 		transaction.setReferenz("rhi12356");
-		transaction.setBeschreibung("Transaktion 4");
+		transaction.setMarktplatz("bitcoin.de");
 		return transaction;
 	}
 }

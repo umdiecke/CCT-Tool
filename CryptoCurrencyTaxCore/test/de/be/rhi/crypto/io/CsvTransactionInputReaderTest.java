@@ -14,6 +14,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import de.be.rhi.crypto.Transaction;
+import de.be.rhi.crypto.io.csv.BitcoinDeCsvTransactionInputReader;
 
 /**
  * TODO RHildebrand JavaDoc
@@ -37,9 +38,15 @@ public class CsvTransactionInputReaderTest {
 		files.add(csvFileEth);
 		files.add(csvFileBch);
 
-		CsvTransactionInputReader csvTransactionInputReaderTest = new CsvTransactionInputReader(files);
+		BitcoinDeCsvTransactionInputReader csvTransactionInputReaderTest = new BitcoinDeCsvTransactionInputReader(files);
 		List<Transaction> transactionList = csvTransactionInputReaderTest.readTransactionList();
+
+		for (Transaction transaction : transactionList) {
+			System.out.println(transaction);
+			System.out.println("");
+		}
 		Assert.assertNotNull(transactionList);
+
 	}
 
 }
