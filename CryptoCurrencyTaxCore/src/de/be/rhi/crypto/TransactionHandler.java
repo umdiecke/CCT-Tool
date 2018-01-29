@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import de.be.rhi.crypto.io.TransactionInputReader;
 
 /**
@@ -22,6 +25,11 @@ public class TransactionHandler {
 	/**
 	 * TODO RHildebrand JavaDoc
 	 */
+	private final Logger LOGGER = LogManager.getLogger();
+
+	/**
+	 * TODO RHildebrand JavaDoc
+	 */
 	private List<Transaction> transactionList;
 	/**
 	 * TODO RHildebrand JavaDoc
@@ -33,8 +41,8 @@ public class TransactionHandler {
 	 *
 	 */
 	public TransactionHandler() {
-		transactionList = new ArrayList<>();
-		depotTransactionMap = new EnumMap<>(Currency.class);
+		this.transactionList = new ArrayList<>();
+		this.depotTransactionMap = new EnumMap<>(Currency.class);
 	}
 
 	/**
@@ -56,20 +64,21 @@ public class TransactionHandler {
 	 */
 	public List<Transaction> rtvDepotTransactionList(final Currency depotCurrency) {
 		List<Transaction> depotTransactionList;
-		if (depotTransactionMap.containsKey(depotCurrency)) {
+		if (this.depotTransactionMap.containsKey(depotCurrency)) {
 
-			depotTransactionList = depotTransactionMap.get(depotCurrency);
+			depotTransactionList = this.depotTransactionMap.get(depotCurrency);
 			if(depotTransactionList==null) {
 				depotTransactionList = new ArrayList<>();
-				depotTransactionMap.put(depotCurrency, depotTransactionList);
+				this.depotTransactionMap.put(depotCurrency, depotTransactionList);
 			}
 
 		} else {
 			depotTransactionList = new ArrayList<>();
-			depotTransactionMap.put(depotCurrency, depotTransactionList);
+			this.depotTransactionMap.put(depotCurrency, depotTransactionList);
 		}
 		return depotTransactionList;
 	}
+
 
 	/**
 	 * TODO RHildebrand JavaDoc
@@ -77,8 +86,8 @@ public class TransactionHandler {
 	 * @return
 	 */
 	private Map<Currency, List<Transaction>> createDepotTransactionMap() {
-		Collections.sort(transactionList);
-		for (Transaction transaction : transactionList) {
+		Collections.sort(this.transactionList);
+		for (Transaction transaction : this.transactionList) {
 
 			List<Transaction> depotTransactionList = rtvDepotTransactionList(transaction.getDepotWaehrung());
 
@@ -88,15 +97,16 @@ public class TransactionHandler {
 			}
 		}
 
-		return depotTransactionMap;
+		return this.depotTransactionMap;
 	}
 
 	/**
 	 * @return the transactionList
 	 */
 	public List<Transaction> getTransactionList() {
-		return transactionList;
+		return this.transactionList;
 	}
+
 
 	/**
 	 * TODO RHildebrand JavaDoc
@@ -105,7 +115,7 @@ public class TransactionHandler {
 	 */
 	public void addTransaction(final Transaction transaction) {
 		if (transaction != null) {
-			transactionList.add(transaction);
+			this.transactionList.add(transaction);
 			createDepotTransactionMap();
 		}
 	}

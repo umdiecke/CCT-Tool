@@ -1,8 +1,8 @@
 package de.be.rhi.crypto;
 
 import java.math.BigDecimal;
-import java.util.Calendar;
 
+import org.joda.time.DateTime;
 import org.junit.Test;
 
 public class TransactionTest {
@@ -16,7 +16,7 @@ public class TransactionTest {
 
 	private Transaction createTransaction1() {
 		Transaction transaction = new Transaction();
-		transaction.setTransactionDate(Calendar.getInstance().getTime());
+		transaction.setTransactionDate(new DateTime());
 		transaction.setTransactionType(TransactionType.KAUF);
 
 		transaction.setBasisWaehrung(Currency.EUR);

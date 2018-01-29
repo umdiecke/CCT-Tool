@@ -2,10 +2,10 @@ package de.be.rhi.crypto;
 
 import java.io.File;
 import java.math.BigDecimal;
-import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.joda.time.DateTime;
 import org.junit.Test;
 
 import de.be.rhi.crypto.io.TransactionInputReader;
@@ -53,7 +53,8 @@ public class TransactionHandlerTest {
 
 	private Transaction createTransaction1() {
 		Transaction transaction = new Transaction();
-		transaction.setTransactionDate(Calendar.getInstance().getTime());
+
+		transaction.setTransactionDate(new DateTime());
 		transaction.setTransactionType(TransactionType.KAUF);
 
 		transaction.setBasisWaehrung(Currency.EUR);
@@ -73,7 +74,7 @@ public class TransactionHandlerTest {
 
 	private Transaction createTransaction2() {
 		Transaction transaction = new Transaction();
-		transaction.setTransactionDate(Calendar.getInstance().getTime());
+		transaction.setTransactionDate(new DateTime());
 		transaction.setTransactionType(TransactionType.KAUF);
 
 		transaction.setBasisWaehrung(Currency.EUR);
@@ -90,7 +91,7 @@ public class TransactionHandlerTest {
 
 	private Transaction createTransaction3() {
 		Transaction transaction = new Transaction();
-		transaction.setTransactionDate(Calendar.getInstance().getTime());
+		transaction.setTransactionDate(new DateTime());
 		transaction.setTransactionType(TransactionType.VERKAUF);
 
 		transaction.setBasisWaehrung(Currency.EUR);
@@ -111,7 +112,7 @@ public class TransactionHandlerTest {
 
 	private Transaction createTransaction4() {
 		Transaction transaction = new Transaction();
-		transaction.setTransactionDate(Calendar.getInstance().getTime());
+		transaction.setTransactionDate(new DateTime());
 		transaction.setTransactionType(TransactionType.KAUF);
 
 

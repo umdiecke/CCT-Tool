@@ -7,9 +7,10 @@ package de.be.rhi.crypto.io.csv;
 
 import java.io.File;
 import java.math.BigDecimal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Set;
+
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import de.be.rhi.crypto.Currency;
 import de.be.rhi.crypto.Transaction;
@@ -25,7 +26,10 @@ import de.be.rhi.crypto.TransactionType;
  */
 public class BitcoinDeCsvTransactionInputReader extends CsvTransactionInputReader {
 
-	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+	/**
+	 * TODO RHildebrand JavaDoc
+	 */
+	private DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
 
 	/**
 	 * TODO RHildebrand JavaDoc
@@ -50,11 +54,7 @@ public class BitcoinDeCsvTransactionInputReader extends CsvTransactionInputReade
 	protected void processLineRow(final int rowNumber, final String rowName, final String rowContent, final Transaction transaction) throws Exception {
 		switch (rowNumber) {
 		case 0:
-			try {
-				transaction.setTransactionDate(this.sdf.parse(rowContent));
-			} catch (ParseException e) {
-				throw new Exception("Fehler beim verarbeiten eines Datums-Strings. Erwartet '" + this.sdf.toPattern() + "'", e);
-			}
+			transaction.setTransactionDate(this.formatter.parseDateTime(rowContent));
 			break;
 		case 1:
 			transaction.setTransactionType(TransactionType.valueOf("Registrierung".equals(rowContent) ? "Initialisierung".toUpperCase() : rowContent.toUpperCase()));

@@ -6,7 +6,9 @@
 package de.be.rhi.crypto;
 
 import java.math.BigDecimal;
-import java.util.Date;
+
+import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
 
 import de.be.rhi.crypto.util.MathUtil;
 import de.be.rhi.crypto.util.ObjectUtil;
@@ -21,10 +23,11 @@ import de.be.rhi.crypto.util.ObjectUtil;
  */
 public class Transaction implements Comparable<Transaction> {
 
+
 	/**
 	 * TODO RHildebrand JavaDoc
 	 */
-	private Date transactionDate;
+	private DateTime transactionDate;
 	/**
 	 * TODO RHildebrand JavaDoc
 	 */
@@ -101,6 +104,43 @@ public class Transaction implements Comparable<Transaction> {
 	 * TODO RHildebrand JavaDoc
 	 */
 	private BigDecimal eigenanteilTransaktionsgebuehr;
+
+	/**
+	 * TODO RHildebrand JavaDoc
+	 *
+	 */
+	public Transaction() {
+		super();
+	}
+
+	/**
+	 * Coppy-Konstruktor
+	 *
+	 * @param transaction
+	 */
+	public Transaction(final Transaction transaction) {
+		super();
+		setBasisWaehrung(transaction.getBasisWaehrung());
+		setBetragBasisWaehrungGebuehrMarktplatz(transaction.getBetragBasisWaehrungGebuehrMarktplatz());
+		setBetragBasisWaehrungNachGebuehrMarktplatz(transaction.getBetragBasisWaehrungNachGebuehrMarktplatz());
+		setBetragBasisWaehrungVorGebuehrMarktplatz(transaction.getBetragBasisWaehrungVorGebuehrMarktplatz());
+		setBetragDepotWaehrungGebuehrMarktplatz(transaction.getBetragDepotWaehrungGebuehrMarktplatz());
+		setBetragDepotWaehrungNachGebuehrMarktplatz(transaction.getBetragDepotWaehrungNachGebuehrMarktplatz());
+		setBetragDepotWaehrungVorGebuehrMarktplatz(transaction.getBetragDepotWaehrungVorGebuehrMarktplatz());
+		setBetragTransaktionsWaehrung(transaction.getBetragTransaktionsWaehrung());
+		setBetragTransaktionsWaehrungGebuehrMarktplatz(transaction.getBetragTransaktionsWaehrungGebuehrMarktplatz());
+		setBetragTransaktionsWaehrungNachGebuehrMarktplatz(transaction.getBetragTransaktionsWaehrungNachGebuehrMarktplatz());
+		setDepotWaehrung(transaction.getDepotWaehrung());
+		setEigenanteilTransaktionsgebuehr(transaction.getEigenanteilTransaktionsgebuehr());
+		setKontostandDepotWaehrungMarktplatz(transaction.getKontostandDepotWaehrungMarktplatz());
+		setKursBasiswaehrung(transaction.getKursBasiswaehrung());
+		setKursTransaktionsWaehrung(transaction.getKursTransaktionsWaehrung());
+		setMarktplatz(transaction.getMarktplatz());
+		setReferenz(transaction.getReferenz());
+		setTransactionDate(transaction.getTransactionDate());
+		setTransactionType(transaction.getTransactionType());
+		setTransaktionsWaehrung(transaction.getTransaktionsWaehrung());
+	}
 
 	/**
 	 * TODO RHildebrand JavaDoc
@@ -246,7 +286,7 @@ public class Transaction implements Comparable<Transaction> {
 	/**
 	 * @return the transactionDate
 	 */
-	public Date getTransactionDate() {
+	public DateTime getTransactionDate() {
 		return this.transactionDate;
 	}
 
@@ -254,7 +294,7 @@ public class Transaction implements Comparable<Transaction> {
 	 * @param transactionDate
 	 *           the transactionDate to set
 	 */
-	public void setTransactionDate(final Date transactionDate) {
+	public void setTransactionDate(final DateTime transactionDate) {
 		this.transactionDate = transactionDate;
 	}
 
@@ -389,24 +429,55 @@ public class Transaction implements Comparable<Transaction> {
 				this.betragDepotWaehrungVorGebuehrMarktplatz = getBetragDepotWaehrungVorGebuehrCalc();
 			}
 			if (this.betragDepotWaehrungGebuehrMarktplatz == null) {
-				this.betragDepotWaehrungGebuehrMarktplatz = getBetragDepotWaehrungGebuehrCalc();
+
+				if (this.betragDepotWaehrungVorGebuehrMarktplatz != null && this.betragDepotWaehrungNachGebuehrMarktplatz != null) {
+					this.betragDepotWaehrungGebuehrMarktplatz = this.betragDepotWaehrungVorGebuehrMarktplatz.subtract(this.betragDepotWaehrungNachGebuehrMarktplatz);
+				} else {
+					this.betragDepotWaehrungGebuehrMarktplatz = getBetragDepotWaehrungGebuehrCalc();
+				}
 			}
 
 			if (this.betragTransaktionsWaehrungNachGebuehrMarktplatz == null) {
 				this.betragTransaktionsWaehrungNachGebuehrMarktplatz = getBetragTransaktionsWaehrungNachGebuehrCalc();
 			}
 			if (this.betragTransaktionsWaehrungGebuehrMarktplatz == null) {
-				this.betragTransaktionsWaehrungGebuehrMarktplatz = getBetragTransaktionsWaehrungGebuehrCalc();
+
+				if (this.betragTransaktionsWaehrung != null && this.betragTransaktionsWaehrungNachGebuehrMarktplatz != null) {
+					this.betragTransaktionsWaehrungGebuehrMarktplatz = this.betragTransaktionsWaehrung.subtract(this.betragTransaktionsWaehrungNachGebuehrMarktplatz);
+				} else {
+					this.betragTransaktionsWaehrungGebuehrMarktplatz = getBetragTransaktionsWaehrungGebuehrCalc();
+				}
 			}
 
 			if (this.betragBasisWaehrungVorGebuehrMarktplatz == null) {
-				this.betragBasisWaehrungVorGebuehrMarktplatz = getBetragBasisWaehrungVorGebuehrCalc();
+
+				if (this.basisWaehrung == this.transaktionsWaehrung && this.betragTransaktionsWaehrung != null) {
+					this.betragBasisWaehrungVorGebuehrMarktplatz = this.betragTransaktionsWaehrung;
+				} else {
+					this.betragBasisWaehrungVorGebuehrMarktplatz = getBetragBasisWaehrungVorGebuehrCalc();
+				}
+
 			}
 			if (this.betragBasisWaehrungNachGebuehrMarktplatz == null) {
-				this.betragBasisWaehrungNachGebuehrMarktplatz = getBetragBasisWaehrungNachGebuehrCalc();
+
+				if (this.basisWaehrung == this.transaktionsWaehrung && this.betragTransaktionsWaehrungNachGebuehrMarktplatz != null) {
+					this.betragBasisWaehrungNachGebuehrMarktplatz = this.betragTransaktionsWaehrungNachGebuehrMarktplatz;
+				} else {
+					this.betragBasisWaehrungNachGebuehrMarktplatz = getBetragBasisWaehrungNachGebuehrCalc();
+				}
 			}
 			if (this.betragBasisWaehrungGebuehrMarktplatz == null) {
-				this.betragBasisWaehrungGebuehrMarktplatz = getBetragBasisWaehrungGebuehrCalc();
+				if (this.betragBasisWaehrungVorGebuehrMarktplatz != null && this.betragBasisWaehrungNachGebuehrMarktplatz != null) {
+					this.betragBasisWaehrungGebuehrMarktplatz = this.betragBasisWaehrungVorGebuehrMarktplatz.subtract(this.betragBasisWaehrungNachGebuehrMarktplatz);
+				} else {
+					this.betragBasisWaehrungGebuehrMarktplatz = getBetragBasisWaehrungGebuehrCalc();
+				}
+			}
+			if (StringUtils.isBlank(this.referenz)) {
+				this.referenz = "HashCode-" + Integer.toString(hashCode());
+			}
+			if (StringUtils.isBlank(this.marktplatz)) {
+				this.marktplatz = "unbekannt";
 			}
 		}
 	}

@@ -13,7 +13,10 @@ import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
 
+import de.be.rhi.crypto.Currency;
+import de.be.rhi.crypto.DepotJournal;
 import de.be.rhi.crypto.Transaction;
+import de.be.rhi.crypto.TransactionHandler;
 import de.be.rhi.crypto.io.csv.BitcoinDeCsvTransactionInputReader;
 
 /**
@@ -41,12 +44,20 @@ public class CsvTransactionInputReaderTest {
 		BitcoinDeCsvTransactionInputReader csvTransactionInputReaderTest = new BitcoinDeCsvTransactionInputReader(files);
 		List<Transaction> transactionList = csvTransactionInputReaderTest.readTransactionList();
 
-		for (Transaction transaction : transactionList) {
-			System.out.println(transaction);
-			System.out.println("");
-		}
+		TransactionHandler transactionHandler = new TransactionHandler();
+		transactionHandler.addTransactionList(transactionList);
+		DepotJournal depotJournal = new DepotJournal(transactionHandler, Currency.ETH);
+
+		System.out.println(depotJournal + "\n");
+
+		depotJournal.setDepotWaehrung(Currency.BCH);
+
+		System.out.println(depotJournal + "\n");
+
+		depotJournal.setDepotWaehrung(Currency.BTC);
+
+		System.out.println(depotJournal + "\n");
+
 		Assert.assertNotNull(transactionList);
-
 	}
-
 }
