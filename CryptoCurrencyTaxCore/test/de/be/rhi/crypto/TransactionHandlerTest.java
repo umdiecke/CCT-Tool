@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import de.be.rhi.crypto.io.TransactionInputReader;
 import de.be.rhi.crypto.io.csv.BitcoinDeCsvTransactionInputReader;
+import de.be.rhi.crypto.io.csv.DefaultCsvTransactionInputReader;
 
 public class TransactionHandlerTest {
 
@@ -51,6 +52,27 @@ public class TransactionHandlerTest {
 		}
 	}
 
+	@Test
+	public void testTransactionHandlerTransactionListWithDefaultCsvImport() {
+
+		File csvFileDefault = new File("U:\\git\\CCT-Tool\\CryptoCurrencyTaxCore\\ressources\\default_csv_transaction_test.csv");
+
+		Set<File> files = new HashSet<>();
+		files.add(csvFileDefault);
+
+		DefaultCsvTransactionInputReader transactionInputReader = new DefaultCsvTransactionInputReader(files);
+
+		Set<TransactionInputReader> inputReader = new HashSet<>();
+		inputReader.add(transactionInputReader);
+
+		TransactionHandler transactionHandler = new TransactionHandler();
+		transactionHandler.loadNewTransactions(inputReader);
+
+		for (Transaction transaction : transactionHandler.getTransactionList()) {
+			System.out.println(transaction + "\n");
+		}
+	}
+
 	private Transaction createTransaction1() {
 		Transaction transaction = new Transaction();
 
@@ -68,7 +90,7 @@ public class TransactionHandlerTest {
 
 
 		transaction.setReferenz("rhi12356");
-		transaction.setMarktplatz("bitcoin.de");
+		transaction.setWalletDescription("bitcoin.de");
 		return transaction;
 	}
 
@@ -85,7 +107,7 @@ public class TransactionHandlerTest {
 		transaction.setBetragTransaktionsWaehrung(new BigDecimal("540"));
 
 		transaction.setReferenz("rhi12356");
-		transaction.setMarktplatz("bitcoin.de");
+		transaction.setWalletDescription("bitcoin.de");
 		return transaction;
 	}
 
@@ -105,7 +127,7 @@ public class TransactionHandlerTest {
 
 
 		transaction.setReferenz("rhi12356");
-		transaction.setMarktplatz("bitcoin.de");
+		transaction.setWalletDescription("bitcoin.de");
 		return transaction;
 	}
 
@@ -129,7 +151,7 @@ public class TransactionHandlerTest {
 
 
 		transaction.setReferenz("rhi12356");
-		transaction.setMarktplatz("bitcoin.de");
+		transaction.setWalletDescription("bitcoin.de");
 		return transaction;
 	}
 }

@@ -18,6 +18,7 @@ import de.be.rhi.crypto.DepotJournal;
 import de.be.rhi.crypto.Transaction;
 import de.be.rhi.crypto.TransactionHandler;
 import de.be.rhi.crypto.io.csv.BitcoinDeCsvTransactionInputReader;
+import de.be.rhi.crypto.io.csv.DefaultCsvTransactionInputReader;
 
 /**
  * TODO RHildebrand JavaDoc
@@ -55,6 +56,26 @@ public class CsvTransactionInputReaderTest {
 		System.out.println(depotJournal + "\n");
 
 		depotJournal.setDepotWaehrung(Currency.BTC);
+
+		System.out.println(depotJournal + "\n");
+
+		Assert.assertNotNull(transactionList);
+	}
+
+	@Test
+	public void testReadTransactionListDefault() {
+
+		File csvFileDefault = new File("U:\\git\\CCT-Tool\\CryptoCurrencyTaxCore\\ressources\\default_csv_transaction_test.csv");
+
+		Set<File> files = new HashSet<>();
+		files.add(csvFileDefault);
+
+		DefaultCsvTransactionInputReader transactionInputReader = new DefaultCsvTransactionInputReader(files);
+		List<Transaction> transactionList = transactionInputReader.readTransactionList();
+
+		TransactionHandler transactionHandler = new TransactionHandler();
+		transactionHandler.addTransactionList(transactionList);
+		DepotJournal depotJournal = new DepotJournal(transactionHandler, Currency.BTC);
 
 		System.out.println(depotJournal + "\n");
 

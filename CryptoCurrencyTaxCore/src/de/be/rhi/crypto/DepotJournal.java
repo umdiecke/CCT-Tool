@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 
 import de.be.rhi.crypto.util.MathUtil;
+import de.be.rhi.crypto.util.ObjectUtil;
 
 /**
  * TODO RHildebrand JavaDoc
@@ -97,12 +98,12 @@ public class DepotJournal {
 						journalLine.setBetragVerkaufBasisWaehrung(MathUtil.calculateRuleOfThree(journalLine.getZuAbgang().abs(), transaction.getBetragBasisWaehrungVorGebuehrMarktplatz(),
 								transaction.getBetragDepotWaehrungVorGebuehrMarktplatz()));
 
-						betragDepotWaehrung = betragDepotWaehrung.add(journalLine.getZuAbgang());
-						journalLine.setBetragDepotWaehrung(betragDepotWaehrung);
+						this.betragDepotWaehrung = this.betragDepotWaehrung.add(journalLine.getZuAbgang());
+						journalLine.setBetragDepotWaehrung(this.betragDepotWaehrung);
 
-						gewinnVerlustBasisWaehrungGesamt = gewinnVerlustBasisWaehrungGesamt.add(journalLine.getBetragGewinnVerlustBasisWaehrung());
-						journalLine.setGewinnVerlustBasisWaehrungGesamt(gewinnVerlustBasisWaehrungGesamt);
-						journalEintraege.add(journalLine);
+						this.gewinnVerlustBasisWaehrungGesamt = this.gewinnVerlustBasisWaehrungGesamt.add(journalLine.getBetragGewinnVerlustBasisWaehrung());
+						journalLine.setGewinnVerlustBasisWaehrungGesamt(this.gewinnVerlustBasisWaehrungGesamt);
+						this.journalEintraege.add(journalLine);
 					}
 				} else {
 					DepotJournalLine journalLine = new DepotJournalLine(transaction);
@@ -110,16 +111,16 @@ public class DepotJournal {
 					journalLine.setKaufDatum(transaction.getTransactionDate());
 					journalLine.setBetragEinkaufBasisWaehrung(BigDecimal.ZERO);
 					journalLine.setBetragVerkaufBasisWaehrung(BigDecimal.ZERO);
-					gewinnVerlustBasisWaehrungGesamt = gewinnVerlustBasisWaehrungGesamt.add(journalLine.getBetragGewinnVerlustBasisWaehrung());
-					journalLine.setGewinnVerlustBasisWaehrungGesamt(gewinnVerlustBasisWaehrungGesamt);
+					this.gewinnVerlustBasisWaehrungGesamt = this.gewinnVerlustBasisWaehrungGesamt.add(journalLine.getBetragGewinnVerlustBasisWaehrung());
+					journalLine.setGewinnVerlustBasisWaehrungGesamt(this.gewinnVerlustBasisWaehrungGesamt);
 
 					if (transaction.getBetragDepotWaehrungNachGebuehrMarktplatz() != null) {
 						journalLine.setZuAbgang(transaction.getBetragDepotWaehrungNachGebuehrMarktplatz());
-						betragDepotWaehrung = betragDepotWaehrung.add(journalLine.getZuAbgang());
-						journalLine.setBetragDepotWaehrung(betragDepotWaehrung);
+						this.betragDepotWaehrung = this.betragDepotWaehrung.add(journalLine.getZuAbgang());
+						journalLine.setBetragDepotWaehrung(this.betragDepotWaehrung);
 					}
 
-					journalEintraege.add(journalLine);
+					this.journalEintraege.add(journalLine);
 
 				}
 			}
@@ -136,7 +137,7 @@ public class DepotJournal {
 		BigDecimal gewinn = BigDecimal.ZERO;
 
 		if (jahr != null) {
-			for (DepotJournalLine depotJournalLine : journalEintraege) {
+			for (DepotJournalLine depotJournalLine : this.journalEintraege) {
 
 				if (depotJournalLine.getTransactionDate().getYear() == jahr.intValue() && depotJournalLine.isInEinJahresRegel()) {
 					gewinn = gewinn.add(depotJournalLine.getBetragGewinnVerlustBasisWaehrung());
@@ -144,7 +145,7 @@ public class DepotJournal {
 			}
 		}
 
-		return gewinn;
+		return ObjectUtil.cutZeroFractionDigits(gewinn);
 	}
 
 	/**
@@ -153,18 +154,18 @@ public class DepotJournal {
 	 */
 	private List<Transaction> createKaufListe(final List<Transaction> transactionList) {
 		List<Transaction> kaufListe = new ArrayList<>();
-		basisWaehrung = null;
+		this.basisWaehrung = null;
 
 		for (Transaction transaction : transactionList) {
-			if(basisWaehrung == null) {
-				basisWaehrung = transaction.getBasisWaehrung();
+			if(this.basisWaehrung == null) {
+				this.basisWaehrung = transaction.getBasisWaehrung();
 			}
 
 			if ((transaction.getTransactionType() == TransactionType.INITIALISIERUNG || transaction.getTransactionType() == TransactionType.KAUF)
 					&& transaction.getBetragDepotWaehrungNachGebuehrMarktplatz() != null) {
 				kaufListe.add(new Transaction(transaction));
 			} else if (transaction.getTransactionType() != TransactionType.VERKAUF) {
-				LOGGER.warn("Der Transaktionstyp '" + transaction.getTransactionType() + "' ist nicht definiert.");
+				this.LOGGER.warn("Der Transaktionstyp '" + transaction.getTransactionType() + "' ist nicht definiert.");
 			}
 		}
 		return kaufListe;
@@ -175,7 +176,7 @@ public class DepotJournal {
 	 * @param depotWaehrung
 	 *           the depotWaehrung to set
 	 */
-	public void setDepotWaehrung(Currency depotWaehrung) {
+	public void setDepotWaehrung(final Currency depotWaehrung) {
 		if (this.depotWaehrung != depotWaehrung) {
 			this.depotWaehrung = depotWaehrung;
 			initializeDepotJournal();
@@ -186,43 +187,44 @@ public class DepotJournal {
 	 * @return the currency
 	 */
 	public Currency getDepotWaehrung() {
-		return depotWaehrung;
+		return this.depotWaehrung;
 	}
 
 	/**
 	 * @return the basisWaehrung
 	 */
 	public Currency getBasisWaehrung() {
-		return basisWaehrung;
+		return this.basisWaehrung;
 	}
 
 	/**
 	 * @return the journalEintraege
 	 */
 	public List<DepotJournalLine> getJournalEintraege() {
-		return journalEintraege;
+		return this.journalEintraege;
 	}
 
 	/**
 	 * @return the transactionHandler
 	 */
 	public TransactionHandler getTransactionHandler() {
-		return transactionHandler;
+		return this.transactionHandler;
 	}
 
 	/**
 	 * @return the betragDepotWaehrung
 	 */
 	public BigDecimal getBetragDepotWaehrung() {
-		return betragDepotWaehrung;
+		return ObjectUtil.cutZeroFractionDigits(this.betragDepotWaehrung);
 	}
 
 	/**
 	 * @return the gewinnVerlustBasisWaehrungGesamt
 	 */
 	public BigDecimal getGewinnVerlustBasisWaehrungGesamt() {
-		return gewinnVerlustBasisWaehrungGesamt;
+		return ObjectUtil.cutZeroFractionDigits(this.gewinnVerlustBasisWaehrungGesamt);
 	}
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -239,6 +241,8 @@ public class DepotJournal {
 		for (int i = anfangsJahr; i <= aktuellesJahr; i++) {
 			sb.append("Zu versteuernder Gewinn / Verlust (" + i + "): " + getZuVersteuerndenGewinnVerlust(i) + " " + getBasisWaehrung() + "\n");
 		}
+
+		sb.append("\n");
 
 		for (DepotJournalLine depotJournalLine : getJournalEintraege()) {
 			sb.append(depotJournalLine);

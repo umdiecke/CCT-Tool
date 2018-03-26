@@ -63,7 +63,7 @@ public class Transaction implements Comparable<Transaction> {
 	/**
 	 * TODO RHildebrand JavaDoc
 	 */
-	private String marktplatz;
+	private String walletDescription;
 	/**
 	 * TODO RHildebrand JavaDoc
 	 */
@@ -135,7 +135,7 @@ public class Transaction implements Comparable<Transaction> {
 		setKontostandDepotWaehrungMarktplatz(transaction.getKontostandDepotWaehrungMarktplatz());
 		setKursBasiswaehrung(transaction.getKursBasiswaehrung());
 		setKursTransaktionsWaehrung(transaction.getKursTransaktionsWaehrung());
-		setMarktplatz(transaction.getMarktplatz());
+		setWalletDescription(transaction.getWalletDescription());
 		setReferenz(transaction.getReferenz());
 		setTransactionDate(transaction.getTransactionDate());
 		setTransactionType(transaction.getTransactionType());
@@ -424,6 +424,14 @@ public class Transaction implements Comparable<Transaction> {
 	 *
 	 */
 	public void calcMissingValues() {
+
+		if (StringUtils.isBlank(this.walletDescription)) {
+			this.walletDescription = "unbekannt";
+		}
+		if (StringUtils.isBlank(this.referenz)) {
+			this.referenz = this.walletDescription + "-" + getTransactionDate().getMillis();
+		}
+
 		if (baseValuesFound()) {
 			if (this.betragDepotWaehrungVorGebuehrMarktplatz == null) {
 				this.betragDepotWaehrungVorGebuehrMarktplatz = getBetragDepotWaehrungVorGebuehrCalc();
@@ -472,12 +480,6 @@ public class Transaction implements Comparable<Transaction> {
 				} else {
 					this.betragBasisWaehrungGebuehrMarktplatz = getBetragBasisWaehrungGebuehrCalc();
 				}
-			}
-			if (StringUtils.isBlank(this.referenz)) {
-				this.referenz = "HashCode-" + Integer.toString(hashCode());
-			}
-			if (StringUtils.isBlank(this.marktplatz)) {
-				this.marktplatz = "unbekannt";
 			}
 		}
 	}
@@ -542,18 +544,18 @@ public class Transaction implements Comparable<Transaction> {
 	}
 
 	/**
-	 * @return the marktplatz
+	 * @return the walletDescription
 	 */
-	public String getMarktplatz() {
-		return this.marktplatz;
+	public String getWalletDescription() {
+		return this.walletDescription;
 	}
 
 	/**
-	 * @param marktplatz
-	 *           the marktplatz to set
+	 * @param walletDescription
+	 *           the walletDescription to set
 	 */
-	public void setMarktplatz(final String marktplatz) {
-		this.marktplatz = marktplatz;
+	public void setWalletDescription(final String walletDescription) {
+		this.walletDescription = walletDescription;
 	}
 
 	/**
@@ -713,7 +715,7 @@ public class Transaction implements Comparable<Transaction> {
 		sb.append("Transaction\n");
 
 		sb.append("Referenz: " + getReferenz() + "\n");
-		sb.append("Marktplatz: " + getMarktplatz() + "\n");
+		sb.append("Wallet: " + getWalletDescription() + "\n");
 		sb.append("Transactionsdatum: " + getTransactionDate() + "\n");
 		sb.append("Transaktionstype: " + getTransactionType().getLabel() + " ("+ getTransactionType().getDescription() + ")\n");
 
@@ -731,34 +733,34 @@ public class Transaction implements Comparable<Transaction> {
 		sb.append("Kontostand Depotwaehrung: " + getKontostandDepotWaehrungMarktplatz() + " " + getDepotWaehrung() + "\n");
 
 		sb.append("Werte Basiswaehrung (Marktplatz):\n");
-		sb.append("Betrag vor Gebuehr: " + getBetragBasisWaehrungVorGebuehrMarktplatz() + " " + getBasisWaehrung() + "\n");
-		sb.append("Betrag Gebuehr: " + getBetragBasisWaehrungGebuehrMarktplatz() + " " + getBasisWaehrung() + "\n");
-		sb.append("Betrag nach Gebuehr: " + getBetragBasisWaehrungNachGebuehrMarktplatz() + " " + getBasisWaehrung() + "\n");
+		sb.append("\tBetrag vor Gebuehr: " + getBetragBasisWaehrungVorGebuehrMarktplatz() + " " + getBasisWaehrung() + "\n");
+		sb.append("\tBetrag Gebuehr: " + getBetragBasisWaehrungGebuehrMarktplatz() + " " + getBasisWaehrung() + "\n");
+		sb.append("\tBetrag nach Gebuehr: " + getBetragBasisWaehrungNachGebuehrMarktplatz() + " " + getBasisWaehrung() + "\n");
 
 		sb.append("Werte Basiswaehrung (berechnet):\n");
-		sb.append("Betrag vor Gebuehr: " + getBetragBasisWaehrungVorGebuehrCalc() + " " + getBasisWaehrung() + "\n");
-		sb.append("Betrag Gebuehr: " + getBetragBasisWaehrungGebuehrCalc() + " "	+ getBasisWaehrung() + "\n");
-		sb.append("Betrag nach Gebuehr: " + getBetragBasisWaehrungNachGebuehrCalc() + " " + getBasisWaehrung() + "\n");
+		sb.append("\tBetrag vor Gebuehr: " + getBetragBasisWaehrungVorGebuehrCalc() + " " + getBasisWaehrung() + "\n");
+		sb.append("\tBetrag Gebuehr: " + getBetragBasisWaehrungGebuehrCalc() + " " + getBasisWaehrung() + "\n");
+		sb.append("\tBetrag nach Gebuehr: " + getBetragBasisWaehrungNachGebuehrCalc() + " " + getBasisWaehrung() + "\n");
 
 		sb.append("Werte Transaktionswaehrung (Marktplatz):\n");
-		sb.append("Betrag vor Gebuehr: " + getBetragTransaktionsWaehrung() + " " + getTransaktionsWaehrung() + "\n");
-		sb.append("Betrag Gebuehr: " + getBetragTransaktionsWaehrungGebuehrMarktplatz() + " " + getTransaktionsWaehrung() + "\n");
-		sb.append("Betrag nach Gebuehr: " + getBetragTransaktionsWaehrungNachGebuehrMarktplatz() + " " + getTransaktionsWaehrung() + "\n");
+		sb.append("\tBetrag vor Gebuehr: " + getBetragTransaktionsWaehrung() + " " + getTransaktionsWaehrung() + "\n");
+		sb.append("\tBetrag Gebuehr: " + getBetragTransaktionsWaehrungGebuehrMarktplatz() + " " + getTransaktionsWaehrung() + "\n");
+		sb.append("\tBetrag nach Gebuehr: " + getBetragTransaktionsWaehrungNachGebuehrMarktplatz() + " " + getTransaktionsWaehrung() + "\n");
 
 		sb.append("Werte Transaktionswaehrung (berechnet):\n");
-		sb.append("Betrag vor Gebuehr: " + getBetragTransaktionsWaehrung() + " " + getTransaktionsWaehrung() + "\n");
-		sb.append("Betrag Gebuehr: " + getBetragTransaktionsWaehrungGebuehrCalc() + " " + getTransaktionsWaehrung() + "\n");
-		sb.append("Betrag nach Gebuehr: " + getBetragTransaktionsWaehrungNachGebuehrCalc() + " " + getTransaktionsWaehrung() + "\n");
+		sb.append("\tBetrag vor Gebuehr: " + getBetragTransaktionsWaehrung() + " " + getTransaktionsWaehrung() + "\n");
+		sb.append("\tBetrag Gebuehr: " + getBetragTransaktionsWaehrungGebuehrCalc() + " " + getTransaktionsWaehrung() + "\n");
+		sb.append("\tBetrag nach Gebuehr: " + getBetragTransaktionsWaehrungNachGebuehrCalc() + " " + getTransaktionsWaehrung() + "\n");
 
 		sb.append("Werte Depotwaehrung (Marktplatz):\n");
-		sb.append("Betrag vor Gebuehr: " + getBetragDepotWaehrungVorGebuehrMarktplatz() + " " + getDepotWaehrung() + "\n");
-		sb.append("Betrag Gebuehr: " + getBetragDepotWaehrungGebuehrMarktplatz() + " " + getDepotWaehrung() + "\n");
-		sb.append("Betrag nach Gebuehr: " + getBetragDepotWaehrungNachGebuehrMarktplatz() + " " + getDepotWaehrung() + "\n");
+		sb.append("\tBetrag vor Gebuehr: " + getBetragDepotWaehrungVorGebuehrMarktplatz() + " " + getDepotWaehrung() + "\n");
+		sb.append("\tBetrag Gebuehr: " + getBetragDepotWaehrungGebuehrMarktplatz() + " " + getDepotWaehrung() + "\n");
+		sb.append("\tBetrag nach Gebuehr: " + getBetragDepotWaehrungNachGebuehrMarktplatz() + " " + getDepotWaehrung() + "\n");
 
 		sb.append("Werte Depotwaehrung (berechnet):\n");
-		sb.append("Betrag vor Gebuehr: " + getBetragDepotWaehrungVorGebuehrCalc() + " " + getDepotWaehrung() + "\n");
-		sb.append("Betrag Gebuehr: " + getBetragDepotWaehrungGebuehrCalc() + " " + getDepotWaehrung() + "\n");
-		sb.append("Betrag nach Gebuehr: " + getBetragDepotWaehrungNachGebuehrCalc() + " " + getDepotWaehrung() + "\n");
+		sb.append("\tBetrag vor Gebuehr: " + getBetragDepotWaehrungVorGebuehrCalc() + " " + getDepotWaehrung() + "\n");
+		sb.append("\tBetrag Gebuehr: " + getBetragDepotWaehrungGebuehrCalc() + " " + getDepotWaehrung() + "\n");
+		sb.append("\tBetrag nach Gebuehr: " + getBetragDepotWaehrungNachGebuehrCalc() + " " + getDepotWaehrung() + "\n");
 
 		sb.append("Valide: " + valide() + "\n");
 

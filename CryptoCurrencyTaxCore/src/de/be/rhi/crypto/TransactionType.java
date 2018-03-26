@@ -3,7 +3,7 @@ package de.be.rhi.crypto;
 /**
  * TODO RHildebrand JavaDoc
  *
- * @author Ren� Hildebrand
+ * @author René Hildebrand
  * @version 1.0
  * @since 13.01.2018, 15:23:39
  *
@@ -24,7 +24,11 @@ public enum TransactionType {
 	/**
 	 * Verkauf - Verkauf von Coins
 	 */
-	VERKAUF("Verkauf", "Verkauf von Depot-Waehrung");
+	VERKAUF("Verkauf", "Verkauf von Depot-Waehrung"),
+	/**
+	 * Transfer - Transfer von einem Wallet / Exchanger auf ein anderes / anderen Exchanger
+	 */
+	TRANSFER("Transfer", "Transfer von einem Wallet auf ein anderes");
 
 	/**
 	 * Label

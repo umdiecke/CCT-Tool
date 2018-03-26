@@ -176,7 +176,7 @@ public class DepotJournalLine extends Transaction {
 		sb.append("Wert bei Verkauf: " + getBetragVerkaufBasisWaehrung() + " " + getBasisWaehrung() + "\n");
 		sb.append("Gewinn / Verlust: " + getBetragGewinnVerlustBasisWaehrung() + " " + getBasisWaehrung() + "\n");
 		sb.append("Kontostand: " + getBetragDepotWaehrung() + " " + getDepotWaehrung() + "\n");
-		sb.append("Gewinn / Verlust (gesamt): " + getBetragDepotWaehrung() + " " + getBasisWaehrung() + "\n\n");
+		sb.append("Gewinn / Verlust (gesamt): " + getGewinnVerlustBasisWaehrungGesamt() + " " + getBasisWaehrung() + "\n\n");
 
 		return sb.toString();
 	}

@@ -121,7 +121,7 @@ public class BitcoinDeCsvTransactionInputReader extends CsvTransactionInputReade
 	 */
 	@Override
 	protected void postProcessingTransaction(final Transaction transaction) {
-		transaction.setMarktplatz("bitcoin.de");
+		transaction.setWalletDescription("bitcoin.de");
 		transaction.setEigenanteilTransaktionsgebuehr(new BigDecimal("50"));
 		transaction.calcMissingValues();
 	}

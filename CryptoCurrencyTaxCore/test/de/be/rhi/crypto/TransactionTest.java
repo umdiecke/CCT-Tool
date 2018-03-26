@@ -30,7 +30,7 @@ public class TransactionTest {
 
 
 		transaction.setReferenz("rhi12356");
-		transaction.setMarktplatz("bitcoin.de");
+		transaction.setWalletDescription("bitcoin.de");
 		return transaction;
 	}
 
