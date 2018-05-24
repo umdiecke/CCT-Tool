@@ -49,15 +49,14 @@ public class CsvTransactionInputReaderTest {
 		transactionHandler.addTransactionList(transactionList);
 		DepotJournal depotJournal = new DepotJournal(transactionHandler, Currency.ETH);
 
-		System.out.println(depotJournal + "\n");
-
-		depotJournal.setDepotWaehrung(Currency.BCH);
-
-		System.out.println(depotJournal + "\n");
-
-		depotJournal.setDepotWaehrung(Currency.BTC);
-
-		System.out.println(depotJournal + "\n");
+		Set<Currency> rtvDepotCurrencies = depotJournal.rtvDepotCurrencies();
+		for (Currency currency : rtvDepotCurrencies) {
+			depotJournal.setDepotWaehrung(currency);
+			System.out.println(depotJournal + "\n");
+			File fileAllgemein = new File("C:\\temp\\test-" + currency.name() + "-allgemein.csv");
+			File fileDetail = new File("C:\\temp\\test-" + currency.name() + "-detail.csv");
+			depotJournal.exportJournalToCsv(fileAllgemein, fileDetail);
+		}
 
 		Assert.assertNotNull(transactionList);
 	}
@@ -77,8 +76,14 @@ public class CsvTransactionInputReaderTest {
 		transactionHandler.addTransactionList(transactionList);
 		DepotJournal depotJournal = new DepotJournal(transactionHandler, Currency.BTC);
 
+		File fileAllgemein = new File("C:\\temp\\test-allgemein.csv");
+		File fileDetail = new File("C:\\temp\\test-detail.csv");
+		depotJournal.exportJournalToCsv(fileAllgemein, fileDetail);
+
 		System.out.println(depotJournal + "\n");
 
 		Assert.assertNotNull(transactionList);
 	}
+
+
 }

@@ -79,6 +79,15 @@ public class TransactionHandler {
 		return depotTransactionList;
 	}
 
+	/**
+	 * TODO RHildebrand JavaDoc
+	 *
+	 * @return
+	 */
+	public Set<Currency> rtvDepotCurrencies() {
+		return this.depotTransactionMap.keySet();
+	}
+
 
 	/**
 	 * TODO RHildebrand JavaDoc

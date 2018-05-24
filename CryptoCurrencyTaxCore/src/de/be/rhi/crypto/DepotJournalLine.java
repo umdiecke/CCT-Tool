@@ -24,6 +24,9 @@ public class DepotJournalLine extends Transaction {
 
 	private String kaufReferenz;
 	private DateTime kaufDatum;
+	private String verkaufReferenz;
+	private DateTime verkaufDatum;
+	private Boolean kauf;
 	private BigDecimal zuAbgang;
 	private BigDecimal betragEinkaufBasisWaehrung;
 	private BigDecimal betragVerkaufBasisWaehrung;
@@ -85,6 +88,51 @@ public class DepotJournalLine extends Transaction {
 	 */
 	public void setKaufDatum(final DateTime kaufDatum) {
 		this.kaufDatum = kaufDatum;
+	}
+
+	/**
+	 * @return the verkaufReferenz
+	 */
+	public String getVerkaufReferenz() {
+		return this.verkaufReferenz;
+	}
+
+	/**
+	 * @param verkaufReferenz
+	 *           the verkaufReferenz to set
+	 */
+	public void setVerkaufReferenz(final String verkaufReferenz) {
+		this.verkaufReferenz = verkaufReferenz;
+	}
+
+	/**
+	 * @return the verkaufDatum
+	 */
+	public DateTime getVerkaufDatum() {
+		return this.verkaufDatum;
+	}
+
+	/**
+	 * @param verkaufDatum
+	 *           the verkaufDatum to set
+	 */
+	public void setVerkaufDatum(final DateTime verkaufDatum) {
+		this.verkaufDatum = verkaufDatum;
+	}
+
+	/**
+	 * @return the kauf
+	 */
+	public Boolean getKauf() {
+		return this.kauf;
+	}
+
+	/**
+	 * @param kauf
+	 *           the kauf to set
+	 */
+	public void setKauf(final Boolean kauf) {
+		this.kauf = kauf;
 	}
 
 	/**

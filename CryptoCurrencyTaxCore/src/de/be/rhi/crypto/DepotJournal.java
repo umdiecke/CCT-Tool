@@ -5,9 +5,11 @@
  */
 package de.be.rhi.crypto;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,6 +17,9 @@ import org.joda.time.DateTime;
 
 import de.be.rhi.crypto.util.MathUtil;
 import de.be.rhi.crypto.util.ObjectUtil;
+import de.umdiecke.protocol.CsvProtocolExport;
+import de.umdiecke.protocol.ProtocolElement;
+import de.umdiecke.util.DataFormatter;
 
 /**
  * TODO RHildebrand JavaDoc
@@ -76,8 +81,11 @@ public class DepotJournal {
 							kaufBak = new Transaction(kauf);
 						}
 
+						journalLine.setKauf(Boolean.FALSE);
 						journalLine.setKaufReferenz(kauf.getReferenz());
 						journalLine.setKaufDatum(kauf.getTransactionDate());
+						journalLine.setVerkaufReferenz(verkauf.getReferenz());
+						journalLine.setVerkaufDatum(verkauf.getTransactionDate());
 
 						if (kauf.getBetragDepotWaehrungNachGebuehrMarktplatz().compareTo(verkauf.getBetragDepotWaehrungVorGebuehrMarktplatz()) > 0) {
 							journalLine.setZuAbgang(verkauf.getBetragDepotWaehrungVorGebuehrMarktplatz().negate());
@@ -107,8 +115,11 @@ public class DepotJournal {
 					}
 				} else {
 					DepotJournalLine journalLine = new DepotJournalLine(transaction);
+					journalLine.setKauf(Boolean.FALSE);
 					journalLine.setKaufReferenz(transaction.getReferenz());
 					journalLine.setKaufDatum(transaction.getTransactionDate());
+					journalLine.setVerkaufReferenz(null);
+					journalLine.setVerkaufDatum(null);
 					journalLine.setBetragEinkaufBasisWaehrung(BigDecimal.ZERO);
 					journalLine.setBetragVerkaufBasisWaehrung(BigDecimal.ZERO);
 					this.gewinnVerlustBasisWaehrungGesamt = this.gewinnVerlustBasisWaehrungGesamt.add(journalLine.getBetragGewinnVerlustBasisWaehrung());
@@ -171,6 +182,26 @@ public class DepotJournal {
 		return kaufListe;
 	}
 
+	/**
+	 * TODO RHildebrand JavaDoc
+	 *
+	 * @return
+	 */
+	public int rtvJahrErsteTransaktion() {
+		List<Transaction> transaktionen = getTransactionHandler().rtvDepotTransactionList(getDepotWaehrung());
+		int anfangsJahr = !transaktionen.isEmpty() ? transaktionen.get(0).getTransactionDate().getYear() : new DateTime().getYear();
+		return anfangsJahr;
+	}
+
+	/**
+	 * TODO RHildebrand JavaDoc
+	 *
+	 * @return
+	 */
+	public Set<Currency> rtvDepotCurrencies() {
+		return this.transactionHandler.rtvDepotCurrencies();
+	}
+
 
 	/**
 	 * @param depotWaehrung
@@ -225,6 +256,58 @@ public class DepotJournal {
 		return ObjectUtil.cutZeroFractionDigits(this.gewinnVerlustBasisWaehrungGesamt);
 	}
 
+	/**
+	 * TODO RHildebrand JavaDoc
+	 *
+	 * @param depotJournal
+	 * @param fileAllgemein
+	 * @param fileDetail
+	 * @param jahr
+	 * @param depotWaehrung
+	 */
+	public void exportJournalToCsv(final File fileAllgemein, final File fileDetail) {
+		CsvProtocolExport csvProtocolExport = new CsvProtocolExport(fileAllgemein, fileDetail, false);
+		ProtocolElement commonProtocolElement = new ProtocolElement("Allgemeine Inhalte");
+		List<ProtocolElement> protocolElementList = new ArrayList<>();
+		try {
+			commonProtocolElement.addContentValue("Depot", getDepotWaehrung().getLabel());
+			commonProtocolElement.addContentValue("Aktueller Bestand", getBetragDepotWaehrung() + " " + getDepotWaehrung());
+			commonProtocolElement.addContentValue("Bisheriger Gewinn / Verlust", getGewinnVerlustBasisWaehrungGesamt() + " " + getBasisWaehrung());
+
+			int anfangsJahr = rtvJahrErsteTransaktion();
+			int aktuellesJahr = new DateTime().getYear();
+
+			for (int i = anfangsJahr; i <= aktuellesJahr; i++) {
+				commonProtocolElement.addContentValue("Zu versteuernder Gewinn / Verlust (" + i + ")", getZuVersteuerndenGewinnVerlust(i) + " " + getBasisWaehrung());
+			}
+
+			int i = 0;
+			for (DepotJournalLine depotJournalLine : getJournalEintraege()) {
+				ProtocolElement lineProtocolElement = new ProtocolElement(i++ + "");
+				lineProtocolElement.addContentValue("Transaktionstyp", depotJournalLine.getTransactionType().getLabel());
+				lineProtocolElement.addContentValue("Kaufreferenz", depotJournalLine.getKaufReferenz());
+				lineProtocolElement.addContentValue("Kaufdatum", DataFormatter.convertDateTime(depotJournalLine.getKaufDatum(), null));
+				lineProtocolElement.addContentValue("Kaufzeit", DataFormatter.convertDateTime(depotJournalLine.getKaufDatum(), "HH:mm:ss"));
+				lineProtocolElement.addContentValue("Verkaufreferenz", depotJournalLine.getVerkaufReferenz());
+				lineProtocolElement.addContentValue("Verkaufdatum", depotJournalLine.getVerkaufDatum() != null ? DataFormatter.convertDateTime(depotJournalLine.getVerkaufDatum(), null) : "");
+				lineProtocolElement.addContentValue("Verkaufzeit", depotJournalLine.getVerkaufDatum() != null ? DataFormatter.convertDateTime(depotJournalLine.getVerkaufDatum(), "HH:mm:ss") : "");
+				lineProtocolElement.addContentValue("In Einjahresregel", depotJournalLine.isInEinJahresRegel());
+				lineProtocolElement.addContentValue("Zu- / Abgang (" + depotJournalLine.getDepotWaehrung() + ")", depotJournalLine.getZuAbgang());
+				lineProtocolElement.addContentValue("Wert bei Kauf (" + depotJournalLine.getBasisWaehrung() + ")", depotJournalLine.getBetragEinkaufBasisWaehrung());
+				lineProtocolElement.addContentValue("Wert bei Verkauf (" + depotJournalLine.getBasisWaehrung() + ")", depotJournalLine.getBetragVerkaufBasisWaehrung());
+				lineProtocolElement.addContentValue("Gewinn / Verlust (" + depotJournalLine.getBasisWaehrung() + ")", depotJournalLine.getBetragGewinnVerlustBasisWaehrung());
+				lineProtocolElement.addContentValue("Kontostand (" + depotJournalLine.getDepotWaehrung() + ")", depotJournalLine.getBetragDepotWaehrung());
+				lineProtocolElement.addContentValue("Gesamt Gewinn / Verlust (" + depotJournalLine.getBasisWaehrung() + ")", depotJournalLine.getGewinnVerlustBasisWaehrungGesamt());
+
+				protocolElementList.add(lineProtocolElement);
+			}
+
+			csvProtocolExport.doExport(commonProtocolElement, protocolElementList);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -235,8 +318,7 @@ public class DepotJournal {
 		sb.append("Bisheriger Gewinn / Verlust: " + getGewinnVerlustBasisWaehrungGesamt() + " " + getBasisWaehrung() + "\n");
 
 		int aktuellesJahr = new DateTime().getYear();
-		List<Transaction> transaktionen = getTransactionHandler().rtvDepotTransactionList(getDepotWaehrung());
-		int anfangsJahr = !transaktionen.isEmpty() ? transaktionen.get(0).getTransactionDate().getYear() : aktuellesJahr;
+		int anfangsJahr = rtvJahrErsteTransaktion();
 
 		for (int i = anfangsJahr; i <= aktuellesJahr; i++) {
 			sb.append("Zu versteuernder Gewinn / Verlust (" + i + "): " + getZuVersteuerndenGewinnVerlust(i) + " " + getBasisWaehrung() + "\n");
