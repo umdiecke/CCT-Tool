@@ -8,9 +8,11 @@ package de.be.rhi.crypto;
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
@@ -43,6 +45,7 @@ public class DepotJournal {
 	private List<DepotJournalLine> journalEintraege;
 	private BigDecimal betragDepotWaehrung;
 	private BigDecimal gewinnVerlustBasisWaehrungGesamt;
+	private HashMap<Integer, BigDecimal> gewinnVerlustBasisWaehrungVorSteuernJahrMap;
 
 	/**
 	 * TODO RHildebrand JavaDoc
@@ -53,6 +56,7 @@ public class DepotJournal {
 	public DepotJournal(final TransactionHandler transactionHandler, final Currency depotWaehrung) {
 		this.transactionHandler = transactionHandler;
 		this.depotWaehrung = depotWaehrung;
+		this.gewinnVerlustBasisWaehrungVorSteuernJahrMap = new HashMap<>();
 		initializeDepotJournal();
 	}
 
@@ -81,7 +85,6 @@ public class DepotJournal {
 							kaufBak = new Transaction(kauf);
 						}
 
-						journalLine.setKauf(Boolean.FALSE);
 						journalLine.setKaufReferenz(kauf.getReferenz());
 						journalLine.setKaufDatum(kauf.getTransactionDate());
 						journalLine.setVerkaufReferenz(verkauf.getReferenz());
@@ -109,19 +112,38 @@ public class DepotJournal {
 						this.betragDepotWaehrung = this.betragDepotWaehrung.add(journalLine.getZuAbgang());
 						journalLine.setBetragDepotWaehrung(this.betragDepotWaehrung);
 
+						// Set Gewinn und Verlust in Basiswährung für das entsprechende Steuerjahr
+						BigDecimal gewinnVerlustBasisWaehrungVorSteuern = journalLine.getBetragGewinnVerlustBasisWaehrung().add(getZuVersteuerndenGewinnVerlust(journalLine.getTransactionDate().getYear()));
+						if (ObjectUtil.isBigDecimalNotZero(gewinnVerlustBasisWaehrungVorSteuern) && StringUtils.isNotBlank(journalLine.getSteuerjahr())) {
+							this.gewinnVerlustBasisWaehrungVorSteuernJahrMap.put(journalLine.getTransactionDate().getYear(), gewinnVerlustBasisWaehrungVorSteuern);
+							journalLine.setGewinnVerlustBasisWaehrungSteuerjahr(gewinnVerlustBasisWaehrungVorSteuern);
+						} else {
+							journalLine.setGewinnVerlustBasisWaehrungSteuerjahr(BigDecimal.ZERO);
+						}
+
+						// Set Gewinn und Verlust in Basiswährung insgesammt
 						this.gewinnVerlustBasisWaehrungGesamt = this.gewinnVerlustBasisWaehrungGesamt.add(journalLine.getBetragGewinnVerlustBasisWaehrung());
 						journalLine.setGewinnVerlustBasisWaehrungGesamt(this.gewinnVerlustBasisWaehrungGesamt);
+
 						this.journalEintraege.add(journalLine);
 					}
 				} else {
 					DepotJournalLine journalLine = new DepotJournalLine(transaction);
-					journalLine.setKauf(Boolean.FALSE);
 					journalLine.setKaufReferenz(transaction.getReferenz());
 					journalLine.setKaufDatum(transaction.getTransactionDate());
 					journalLine.setVerkaufReferenz(null);
 					journalLine.setVerkaufDatum(null);
 					journalLine.setBetragEinkaufBasisWaehrung(BigDecimal.ZERO);
 					journalLine.setBetragVerkaufBasisWaehrung(BigDecimal.ZERO);
+
+					BigDecimal gewinnVerlustBasisWaehrungVorSteuern = journalLine.getBetragGewinnVerlustBasisWaehrung().add(getZuVersteuerndenGewinnVerlust(journalLine.getTransactionDate().getYear()));
+					if (ObjectUtil.isBigDecimalNotZero(gewinnVerlustBasisWaehrungVorSteuern) && StringUtils.isNotBlank(journalLine.getSteuerjahr())) {
+						this.gewinnVerlustBasisWaehrungVorSteuernJahrMap.put(journalLine.getTransactionDate().getYear(), gewinnVerlustBasisWaehrungVorSteuern);
+						journalLine.setGewinnVerlustBasisWaehrungSteuerjahr(gewinnVerlustBasisWaehrungVorSteuern);
+					} else {
+						journalLine.setGewinnVerlustBasisWaehrungSteuerjahr(BigDecimal.ZERO);
+					}
+
 					this.gewinnVerlustBasisWaehrungGesamt = this.gewinnVerlustBasisWaehrungGesamt.add(journalLine.getBetragGewinnVerlustBasisWaehrung());
 					journalLine.setGewinnVerlustBasisWaehrungGesamt(this.gewinnVerlustBasisWaehrungGesamt);
 
@@ -147,14 +169,18 @@ public class DepotJournal {
 	public BigDecimal getZuVersteuerndenGewinnVerlust(final Integer jahr) {
 		BigDecimal gewinn = BigDecimal.ZERO;
 
-		if (jahr != null) {
-			for (DepotJournalLine depotJournalLine : this.journalEintraege) {
-
-				if (depotJournalLine.getTransactionDate().getYear() == jahr.intValue() && depotJournalLine.isInEinJahresRegel()) {
-					gewinn = gewinn.add(depotJournalLine.getBetragGewinnVerlustBasisWaehrung());
-				}
-			}
+		if (this.gewinnVerlustBasisWaehrungVorSteuernJahrMap.containsKey(jahr)) {
+			gewinn = this.gewinnVerlustBasisWaehrungVorSteuernJahrMap.get(jahr);
 		}
+
+		// if (jahr != null) {
+		// for (DepotJournalLine depotJournalLine : this.journalEintraege) {
+		//
+		// if (depotJournalLine.getTransactionDate().getYear() == jahr.intValue() && depotJournalLine.isInEinJahresRegel()) {
+		// gewinn = gewinn.add(depotJournalLine.getBetragGewinnVerlustBasisWaehrung());
+		// }
+		// }
+		// }
 
 		return ObjectUtil.cutZeroFractionDigits(gewinn);
 	}
@@ -291,12 +317,14 @@ public class DepotJournal {
 				lineProtocolElement.addContentValue("Verkaufreferenz", depotJournalLine.getVerkaufReferenz());
 				lineProtocolElement.addContentValue("Verkaufdatum", depotJournalLine.getVerkaufDatum() != null ? DataFormatter.convertDateTime(depotJournalLine.getVerkaufDatum(), null) : "");
 				lineProtocolElement.addContentValue("Verkaufzeit", depotJournalLine.getVerkaufDatum() != null ? DataFormatter.convertDateTime(depotJournalLine.getVerkaufDatum(), "HH:mm:ss") : "");
-				lineProtocolElement.addContentValue("In Einjahresregel", depotJournalLine.isInEinJahresRegel());
+				lineProtocolElement.addContentValue("Einjahresregel", depotJournalLine.isInEinJahresRegel());
+				lineProtocolElement.addContentValue("Steuerjahr", depotJournalLine.getSteuerjahr());
 				lineProtocolElement.addContentValue("Zu- / Abgang (" + depotJournalLine.getDepotWaehrung() + ")", depotJournalLine.getZuAbgang());
 				lineProtocolElement.addContentValue("Wert bei Kauf (" + depotJournalLine.getBasisWaehrung() + ")", depotJournalLine.getBetragEinkaufBasisWaehrung());
 				lineProtocolElement.addContentValue("Wert bei Verkauf (" + depotJournalLine.getBasisWaehrung() + ")", depotJournalLine.getBetragVerkaufBasisWaehrung());
 				lineProtocolElement.addContentValue("Gewinn / Verlust (" + depotJournalLine.getBasisWaehrung() + ")", depotJournalLine.getBetragGewinnVerlustBasisWaehrung());
 				lineProtocolElement.addContentValue("Kontostand (" + depotJournalLine.getDepotWaehrung() + ")", depotJournalLine.getBetragDepotWaehrung());
+				lineProtocolElement.addContentValue("Steuerjahr Gewinn / Verlust (" + depotJournalLine.getBasisWaehrung() + ")", depotJournalLine.getGewinnVerlustBasisWaehrungSteuerjahr());
 				lineProtocolElement.addContentValue("Gesamt Gewinn / Verlust (" + depotJournalLine.getBasisWaehrung() + ")", depotJournalLine.getGewinnVerlustBasisWaehrungGesamt());
 
 				protocolElementList.add(lineProtocolElement);

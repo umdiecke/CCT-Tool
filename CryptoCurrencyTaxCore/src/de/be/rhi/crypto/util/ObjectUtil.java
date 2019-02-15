@@ -20,7 +20,7 @@ public class ObjectUtil {
 	 * @return
 	 */
 	public static boolean isBigDecimalZeroOrNull(final BigDecimal bigDecimal) {
-		return bigDecimal == null || BigDecimal.ZERO.equals(bigDecimal);
+		return bigDecimal == null || bigDecimal.signum() == 0;
 	}
 
 	/**

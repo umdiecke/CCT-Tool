@@ -26,12 +26,13 @@ public class DepotJournalLine extends Transaction {
 	private DateTime kaufDatum;
 	private String verkaufReferenz;
 	private DateTime verkaufDatum;
-	private Boolean kauf;
 	private BigDecimal zuAbgang;
 	private BigDecimal betragEinkaufBasisWaehrung;
 	private BigDecimal betragVerkaufBasisWaehrung;
 	private BigDecimal betragDepotWaehrung;
+	private BigDecimal gewinnVerlustBasisWaehrungSteuerjahr;
 	private BigDecimal gewinnVerlustBasisWaehrungGesamt;
+
 
 	/**
 	 * TODO RHildebrand JavaDoc
@@ -40,6 +41,19 @@ public class DepotJournalLine extends Transaction {
 	 */
 	public DepotJournalLine(final Transaction transaction) {
 		super(transaction);
+	}
+
+	/**
+	 * TODO RHildebrand JavaDoc
+	 *
+	 * @return
+	 */
+	public String getSteuerjahr() {
+		String steuerjahr = "";
+		if ((getTransactionType() == TransactionType.VERKAUF) && isInEinJahresRegel() && getTransactionDate() != null) {
+			steuerjahr = getTransactionDate().getYear() + "";
+		}
+		return steuerjahr;
 	}
 
 	public boolean isInEinJahresRegel() {
@@ -123,16 +137,8 @@ public class DepotJournalLine extends Transaction {
 	/**
 	 * @return the kauf
 	 */
-	public Boolean getKauf() {
-		return this.kauf;
-	}
-
-	/**
-	 * @param kauf
-	 *           the kauf to set
-	 */
-	public void setKauf(final Boolean kauf) {
-		this.kauf = kauf;
+	public Boolean isKauf() {
+		return getTransactionType() == TransactionType.KAUF;
 	}
 
 	/**
@@ -196,6 +202,20 @@ public class DepotJournalLine extends Transaction {
 	}
 
 	/**
+	 * @return the gewinnVerlustBasisWaehrungSteuerjahr
+	 */
+	public BigDecimal getGewinnVerlustBasisWaehrungSteuerjahr() {
+		return ObjectUtil.cutZeroFractionDigits(this.gewinnVerlustBasisWaehrungSteuerjahr);
+	}
+
+	/**
+	 * @param gewinnVerlustBasisWaehrungSteuerjahr the gewinnVerlustBasisWaehrungSteuerjahr to set
+	 */
+	public void setGewinnVerlustBasisWaehrungSteuerjahr(final BigDecimal gewinnVerlustBasisWaehrungSteuerjahr) {
+		this.gewinnVerlustBasisWaehrungSteuerjahr = gewinnVerlustBasisWaehrungSteuerjahr;
+	}
+
+	/**
 	 * @return the gewinnVerlustBasisWaehrungGesamt
 	 */
 	public BigDecimal getGewinnVerlustBasisWaehrungGesamt() {
@@ -218,12 +238,14 @@ public class DepotJournalLine extends Transaction {
 
 		sb.append("Kaufreferenz: " + getKaufReferenz() + "\n");
 		sb.append("Kaufdatum: " + getKaufDatum() + "\n");
-		sb.append("In Einjahresregel: " + isInEinJahresRegel() + "\n");
+		sb.append("Einjahresregel: " + isInEinJahresRegel() + "\n");
+		sb.append("Steuerjahr: " + getSteuerjahr() + "\n");
 		sb.append("Zu- / Abgang: " + getZuAbgang() + " " + getDepotWaehrung() + "\n");
 		sb.append("Wert bei Kauf: " + getBetragEinkaufBasisWaehrung() + " " + getBasisWaehrung() + "\n");
 		sb.append("Wert bei Verkauf: " + getBetragVerkaufBasisWaehrung() + " " + getBasisWaehrung() + "\n");
 		sb.append("Gewinn / Verlust: " + getBetragGewinnVerlustBasisWaehrung() + " " + getBasisWaehrung() + "\n");
 		sb.append("Kontostand: " + getBetragDepotWaehrung() + " " + getDepotWaehrung() + "\n");
+		sb.append("Gewinn / Verlust (Steuerjahr): " + getGewinnVerlustBasisWaehrungSteuerjahr() + " " + getBasisWaehrung() + "\n");
 		sb.append("Gewinn / Verlust (gesamt): " + getGewinnVerlustBasisWaehrungGesamt() + " " + getBasisWaehrung() + "\n\n");
 
 		return sb.toString();
